@@ -55,7 +55,15 @@ A viral, polished, hilarious, and curiosity-driven single-page web game built wi
   - *Calculating Mom's chappal velocity...*
 - Comedic stamped verdict (*APPROVED JHOOT*, *CHAPPAL WARRANT*, *DRAMA QUEEN*) with suspicion scores.
 
-### 6. 🔮 Mystery Mode: "Bahana Lab After Dark 🌙"
+### 6. ✍️ Apna Bahana Add Karo (Community Submissions)
+- Add your own custom desi excuse with:
+  - Custom category, absurdity & suspicion ratings
+  - Author / agent alias badge
+  - Optional "Make It Worse" escalation
+- Instantly saved to `localStorage` and injected into the active generator pool.
+- Manage your submitted excuses in the "Mere Shamil Karda Bahanay" list (Test & Delete).
+
+### 7. 🔮 Mystery Mode: "Bahana Lab After Dark 🌙"
 - Locked by default; automatically unlocks after 10 user interactions (persisted in `localStorage`).
 - Reveals midnight cyber-desi theme with **Impossible Excuses** (load-shedding time portals, 5th dimension WiFi, alien biryani tastings).
 

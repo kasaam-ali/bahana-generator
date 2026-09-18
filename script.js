@@ -131,7 +131,7 @@ const sfx = new SoundFX();
 // ============================================================================
 // 2. CURATED DESI EXCUSES DATABASE (65+ Original, Authentic, Family-Friendly)
 // ============================================================================
-const EXCUSES_DB = [
+let EXCUSES_DB = [
   // --- Student ---
   {
     id: 1,
@@ -867,6 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAfterDark();
   initChallengeBanner();
   initModalClose();
+  initUserSubmissions();
 
   // Generate deterministic Daily Bahana or Initial random
   loadInitialExcuse();
@@ -1130,6 +1131,16 @@ function renderExcuseCard(item, isDaily = false) {
   const suspVal = document.getElementById('meter-suspicion-val');
   const suspBar = document.getElementById('meter-suspicion-bar');
   const card = document.getElementById('excuse-card');
+
+  const userBadge = document.getElementById('card-user-badge');
+  if (userBadge) {
+    if (item.isUserSubmitted) {
+      userBadge.style.display = 'inline-block';
+      userBadge.textContent = `👤 By ${item.author || 'Desi Legend'}`;
+    } else {
+      userBadge.style.display = 'none';
+    }
+  }
 
   if (card) card.classList.remove('legendary-jackpot');
   if (categoryTag) categoryTag.textContent = `✨ ${item.category}`;
@@ -1733,3 +1744,208 @@ function showToast(message) {
     toast.classList.remove('show');
   }, 2800);
 }
+
+// ============================================================================
+// 17. USER BAHANA SUBMISSION & COMMUNITY POOL (Add Your Own Bahana)
+// ============================================================================
+function initUserSubmissions() {
+  loadStoredUserBahanas();
+
+  // Top-nav shortcut button
+  document.getElementById('btn-open-submit-nav')?.addEventListener('click', () => {
+    sfx.playClick();
+    switchSubTab('section-submit');
+    document.getElementById('section-submit')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Real-time slider labels
+  const absSlider = document.getElementById('range-user-absurdity');
+  const absLabel = document.getElementById('label-user-absurdity');
+  absSlider?.addEventListener('input', (e) => {
+    if (absLabel) absLabel.textContent = `${e.target.value}%`;
+  });
+
+  const suspSlider = document.getElementById('range-user-suspicion');
+  const suspLabel = document.getElementById('label-user-suspicion');
+  suspSlider?.addEventListener('input', (e) => {
+    if (suspLabel) suspLabel.textContent = `${e.target.value}%`;
+  });
+
+  // Submit form handler
+  const form = document.getElementById('form-add-bahana');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitUserBahana();
+  });
+
+  document.getElementById('btn-submit-new-bahana')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    submitUserBahana();
+  });
+}
+
+function loadStoredUserBahanas() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('custom_user_bahanas') || '[]');
+    if (Array.isArray(stored) && stored.length > 0) {
+      stored.forEach((item) => {
+        // Only push if not already in EXCUSES_DB
+        if (!EXCUSES_DB.some((e) => e.id === item.id)) {
+          EXCUSES_DB.unshift(item);
+        }
+      });
+    }
+    renderUserBahanasList(stored);
+  } catch (e) {
+    console.error("Error loading user bahanas", e);
+  }
+}
+
+function submitUserBahana() {
+  const textInput = document.getElementById('input-user-bahana');
+  const categorySelect = document.getElementById('select-user-category');
+  const authorInput = document.getElementById('input-user-author');
+  const absSlider = document.getElementById('range-user-absurdity');
+  const suspSlider = document.getElementById('range-user-suspicion');
+  const escInput = document.getElementById('input-user-escalation');
+
+  const text = textInput?.value.trim();
+  if (!text || text.length < 5) {
+    sfx.playBuzzer();
+    showToast('Pehle koi dhang ka bahana toh likhein! (Min 5 characters) ✍️');
+    textInput?.focus();
+    return;
+  }
+
+  const category = categorySelect?.value || 'Universal';
+  const author = authorInput?.value.trim() || 'Desi Legend';
+  const absurdity = parseInt(absSlider?.value || '85', 10);
+  const suspicion = parseInt(suspSlider?.value || '90', 10);
+  const escalation = escInput?.value.trim() || 'Aur phir khandan ke group mein meeting shuru ho gayi!';
+
+  let risk = 'Safe-ish 🟢';
+  if (suspicion >= 92) risk = 'Chappal Imminent 🩴';
+  else if (suspicion >= 80) risk = 'Khatarnak 🔴';
+  else if (suspicion >= 50) risk = 'Dangerous 🟡';
+
+  const newBahana = {
+    id: 'user_' + Date.now(),
+    category: category,
+    text: text,
+    absurdity: absurdity,
+    suspicion: suspicion,
+    risk: risk,
+    escalation: escalation,
+    author: author,
+    isUserSubmitted: true
+  };
+
+  // 1. Add to in-memory pool
+  EXCUSES_DB.unshift(newBahana);
+
+  // 2. Save to localStorage
+  try {
+    const stored = JSON.parse(localStorage.getItem('custom_user_bahanas') || '[]');
+    stored.unshift(newBahana);
+    localStorage.setItem('custom_user_bahanas', JSON.stringify(stored));
+    renderUserBahanasList(stored);
+  } catch (e) {
+    console.error("Failed to save to localStorage", e);
+  }
+
+  // 3. Clear inputs
+  if (textInput) textInput.value = '';
+  if (authorInput) authorInput.value = '';
+  if (escInput) escInput.value = '';
+
+  // 4. Celebrate!
+  sfx.playFanfare();
+  confetti.burst(75);
+  showToast('🎉 Zabardast! Aap ka bahana generator mein add ho gaya!');
+  setMascotState('legendary', `Wah ${author}! Kya dhasu bahana shamil kiya hai!`);
+  incrementLaughs(5);
+  trackMysteryAction();
+
+  // 5. Display the newly added bahana in the main excuse card
+  renderExcuseCard(newBahana, false);
+  const card = document.getElementById('excuse-card');
+  card?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderUserBahanasList(list = null) {
+  const container = document.getElementById('user-bahanas-list');
+  const countEl = document.getElementById('user-bahana-count');
+  if (!container) return;
+
+  const userList = list !== null 
+    ? list 
+    : JSON.parse(localStorage.getItem('custom_user_bahanas') || '[]');
+
+  if (countEl) countEl.textContent = userList.length;
+
+  if (userList.length === 0) {
+    container.innerHTML = '<p class="empty-list-text">Abhi tak aap ne koi bahana add nahi kiya. Upar form se pehla bahana submit karein!</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  userList.forEach((item) => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'user-bahana-item';
+    itemEl.innerHTML = `
+      <div class="user-bahana-info">
+        <p class="user-bahana-quote">"${item.text}"</p>
+        <div class="user-bahana-submeta">
+          <span>🏷️ ${item.category}</span>
+          <span>👤 ${item.author || 'Desi Legend'}</span>
+          <span>🤯 Absurdity: ${item.absurdity}%</span>
+          <span>${item.risk}</span>
+        </div>
+      </div>
+      <div class="user-bahana-actions">
+        <button class="btn-test-user-bahana" data-id="${item.id}" title="Test in Main Generator">Test 🎲</button>
+        <button class="btn-delete-user-bahana" data-id="${item.id}" title="Delete this Bahana">Delete 🗑️</button>
+      </div>
+    `;
+    container.appendChild(itemEl);
+  });
+
+  // Attach event handlers for Test & Delete buttons
+  container.querySelectorAll('.btn-test-user-bahana').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const found = EXCUSES_DB.find((item) => item.id === id);
+      if (found) {
+        sfx.playPop();
+        renderExcuseCard(found, false);
+        document.getElementById('excuse-card')?.scrollIntoView({ behavior: 'smooth' });
+        showToast('Testing your submitted bahana! 🎲');
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-delete-user-bahana').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      deleteUserBahana(id);
+    });
+  });
+}
+
+function deleteUserBahana(id) {
+  sfx.playClick();
+  try {
+    let stored = JSON.parse(localStorage.getItem('custom_user_bahanas') || '[]');
+    stored = stored.filter((item) => item.id !== id);
+    localStorage.setItem('custom_user_bahanas', JSON.stringify(stored));
+
+    // Remove from in-memory pool
+    EXCUSES_DB = EXCUSES_DB.filter((item) => item.id !== id);
+
+    renderUserBahanasList(stored);
+    showToast('Bahana delete kar dia gaya! 🗑️');
+  } catch (e) {
+    console.error("Error deleting bahana", e);
+  }
+}
+

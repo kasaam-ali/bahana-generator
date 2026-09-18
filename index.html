@@ -22,6 +22,10 @@
       <span class="badge-pill v-tag">v2.0</span>
     </div>
     <div class="nav-controls">
+      <button id="btn-open-submit-nav" class="nav-btn submit-nav-btn" aria-label="Add Bahana" title="Apna Bahana Add Karo">
+        <span class="btn-icon">✍️</span>
+        <span class="btn-text">Add Bahana</span>
+      </button>
       <button id="sound-toggle-btn" class="nav-btn" aria-label="Toggle Sound Effects" title="Sound FX (On/Off)">
         <span id="sound-icon">🔊</span>
         <span class="btn-text">Audio</span>
@@ -189,6 +193,7 @@
               <span class="category-tag" id="card-category">✨ Universal</span>
               <span class="daily-tag" id="card-daily-badge" style="display: none;">🌟 Today's Daily Bahana</span>
               <span class="escalated-tag" id="card-escalated-badge" style="display: none;">🤯 Escalated Level</span>
+              <span class="user-submitted-tag" id="card-user-badge" style="display: none;">👤 Community Bahana</span>
             </div>
             <span class="risk-level-badge" id="card-risk-level">Risk: Safe-ish 🟢</span>
           </div>
@@ -254,6 +259,7 @@
       <button class="sub-tab-btn" data-target="section-custom">🧪 Bahana Studio</button>
       <button class="sub-tab-btn" data-target="section-detector">🕵️ Lie Detector</button>
       <button class="sub-tab-btn" data-target="section-curiosity">👀 Secret Vault</button>
+      <button class="sub-tab-btn" data-target="section-submit">✍️ Add Your Bahana</button>
     </nav>
 
     <!-- 1. BAHANA BATTLE SECTION -->
@@ -479,6 +485,87 @@
           <h3 class="curiosity-title">The Excuse Nobody Believes</h3>
           <p class="curiosity-preview">The rawest, most dangerous truth in human history.</p>
           <button class="curiosity-btn">Reveal Truth 🤫</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ADD YOUR OWN BAHANA (COMMUNITY SUBMISSION) -->
+    <section id="section-submit" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">✍️ Apna Bahana Add Karo</h2>
+        <p class="section-desc">Apna shahi jhoot yahan likhein aur generator mein hamesha ke liye shamil karein!</p>
+      </div>
+
+      <div class="custom-studio-card submit-card">
+        <form id="form-add-bahana" onsubmit="return false;">
+          <div class="studio-form-grid">
+            <!-- Excuse Text Input -->
+            <div class="studio-input-group full-width">
+              <label for="input-user-bahana" class="studio-label">📝 Apna Bahana Likhein (Required):</label>
+              <textarea id="input-user-bahana" class="detector-textarea" rows="3" placeholder="Maslan: 'Sir assignment complete tha lekin padosi ki bakri file kha gayi...'"></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="studio-input-group">
+              <label for="select-user-category" class="studio-label">🏷️ Category Chunain:</label>
+              <select id="select-user-category" class="studio-select">
+                <option value="Student">📚 Student</option>
+                <option value="Office">💼 Office</option>
+                <option value="Late Arrival">⏰ Late Arrival</option>
+                <option value="Desi Family">🧕 Desi Family</option>
+                <option value="Relationship">💔 Relationship</option>
+                <option value="Friends">🍕 Friends</option>
+                <option value="Universal">🌍 Universal</option>
+                <option value="Exam Survival">📝 Exam Survival</option>
+                <option value="Online Meeting">💻 Online Meeting</option>
+                <option value="Pakistani Daily Life">🇵🇰 Pakistani Daily Life</option>
+              </select>
+            </div>
+
+            <!-- Author Alias -->
+            <div class="studio-input-group">
+              <label for="input-user-author" class="studio-label">🕵️ Aap Ka Naam / Alias:</label>
+              <input type="text" id="input-user-author" class="studio-select" placeholder="e.g. Backbencher King, Chacha Pro" maxlength="30" />
+            </div>
+
+            <!-- Absurdity Slider -->
+            <div class="studio-input-group">
+              <label for="range-user-absurdity" class="studio-label">
+                🤯 Absurdity Level: <span id="label-user-absurdity" class="highlight-val">85%</span>
+              </label>
+              <input type="range" id="range-user-absurdity" min="10" max="100" value="85" class="custom-slider" />
+            </div>
+
+            <!-- Suspicion Slider -->
+            <div class="studio-input-group">
+              <label for="range-user-suspicion" class="studio-label">
+                🔍 Suspicion / Risk: <span id="label-user-suspicion" class="highlight-val">90%</span>
+              </label>
+              <input type="range" id="range-user-suspicion" min="10" max="100" value="90" class="custom-slider" />
+            </div>
+
+            <!-- Make It Worse Escalation (Optional) -->
+            <div class="studio-input-group full-width">
+              <label for="input-user-escalation" class="studio-label">🤯 "Make It Worse" Escalation (Optional):</label>
+              <input type="text" id="input-user-escalation" class="studio-select" placeholder="Maslan: 'Aur phir police ne bakri ko prime suspect bana lia!'" />
+            </div>
+          </div>
+
+          <div class="studio-btn-wrap" style="margin-top: 20px;">
+            <button type="submit" id="btn-submit-new-bahana" class="giant-bahana-btn submit-btn">
+              <span>GENERATOR MEIN SHAMIL KARO 🚀</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- User Submitted Bahanas List -->
+        <div class="user-bahanas-container" id="user-bahanas-container">
+          <div class="user-bahanas-header">
+            <h3 class="user-bahanas-title">📦 Mere Shamil Karda Bahanay (<span id="user-bahana-count">0</span>)</h3>
+          </div>
+          <div class="user-bahanas-list" id="user-bahanas-list">
+            <p class="empty-list-text" id="empty-user-bahanas-msg">Abhi tak aap ne koi bahana add nahi kiya. Upar form se pehla bahana submit karein!</p>
+          </div>
         </div>
       </div>
     </section>
