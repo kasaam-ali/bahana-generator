@@ -256,6 +256,7 @@
     <!-- SECTION TABS / MINI-GAMES NAV -->
     <nav class="sub-nav-tabs">
       <button class="sub-tab-btn active" data-target="section-battle">🎭 Bahana Battle</button>
+      <button class="sub-tab-btn" data-target="section-friends-clash">👥 Friends Showdown 🏆</button>
       <button class="sub-tab-btn" data-target="section-custom">🧪 Bahana Studio</button>
       <button class="sub-tab-btn" data-target="section-detector">🕵️ Lie Detector</button>
       <button class="sub-tab-btn" data-target="section-curiosity">👀 Secret Vault</button>
@@ -565,6 +566,136 @@
           </div>
           <div class="user-bahanas-list" id="user-bahanas-list">
             <p class="empty-list-text" id="empty-user-bahanas-msg">Abhi tak aap ne koi bahana add nahi kiya. Upar form se pehla bahana submit karein!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FRIENDS BAHANA SHOWDOWN (PARTY GAME: KIS KA BAHANA SAB SE TOP HAI?) -->
+    <section id="section-friends-clash" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">👥 Friends Bahana Showdown 🏆</h2>
+        <p class="section-desc">Doston ka aapas mein muqabla! Har dost apna bahana dale aur faisla ho kis ka sab se acha hai!</p>
+      </div>
+
+      <div class="friends-clash-card" id="friends-clash-card">
+        <!-- PHASE 1: SETUP PLAYERS & SITUATION -->
+        <div class="clash-phase" id="clash-phase-setup">
+          <div class="clash-situation-box">
+            <label for="select-clash-situation" class="studio-label">🎯 Challenge Situation (Musibat):</label>
+            <select id="select-clash-situation" class="studio-select">
+              <option value="treat_avoid" selected>🍕 Pizza / Biryani Treat dene se bachna hai</option>
+              <option value="late_meetup">⏰ 2 ghante late ho kar meetup pe pohnchna hai</option>
+              <option value="phone_ghost">📵 Dost ka urgent call jan-boojh ke cut kar dia</option>
+              <option value="borrow_money">💸 Dost se udhaar maangne ka bahana</option>
+              <option value="cancel_plan">🛌 Aakhri 5 minute pe pura plan drop karna hai</option>
+              <option value="custom">✍️ Apni Marzi Ki Situation (Custom)</option>
+            </select>
+            <input type="text" id="input-clash-custom-situation" class="studio-select" style="margin-top: 10px; display: none;" placeholder="Apni custom situation yahan likhein (e.g. Shaadi pe nahi jana)..." />
+          </div>
+
+          <!-- Player Names Input List -->
+          <div class="clash-players-setup">
+            <label class="studio-label">🎮 Friends (2 se 5 Players):</label>
+            <div id="clash-players-inputs" class="clash-players-grid">
+              <div class="player-input-row">
+                <span class="player-avatar-badge">👤 P1</span>
+                <input type="text" class="clash-player-name studio-select" placeholder="Dost 1 ka naam" value="Ali" maxlength="20" />
+              </div>
+              <div class="player-input-row">
+                <span class="player-avatar-badge">👤 P2</span>
+                <input type="text" class="clash-player-name studio-select" placeholder="Dost 2 ka naam" value="Hamza" maxlength="20" />
+              </div>
+            </div>
+            <div class="clash-player-controls">
+              <button id="btn-add-clash-player" class="tiny-btn" type="button">➕ Aur Dost Add Karo</button>
+              <button id="btn-remove-clash-player" class="tiny-btn warning" type="button">➖ Ek Dost Hatao</button>
+            </div>
+          </div>
+
+          <div class="studio-btn-wrap" style="margin-top: 24px;">
+            <button id="btn-start-clash-game" class="giant-bahana-btn">
+              <span>GAME SHURU KARO 🎲</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PHASE 2: SECRET EXCUSE ENTRY (TURN BY TURN) -->
+        <div class="clash-phase" id="clash-phase-input" style="display: none;">
+          <div class="turn-banner">
+            <span class="turn-badge" id="clash-turn-badge">Player 1 of 2</span>
+            <h3 class="turn-heading" id="clash-turn-player-name">Ali ki baari hai! 🤫</h3>
+            <p class="turn-sub">Phone/Screen baqi doston se chhupa lein aur apna killer bahana likhein!</p>
+          </div>
+
+          <div class="clash-prompt-reminder">
+            <strong>Situation:</strong> <span id="clash-reminder-situation">Pizza / Biryani Treat dene se bachna hai</span>
+          </div>
+
+          <div class="studio-input-group full-width" style="margin-top: 16px;">
+            <label for="input-clash-excuse" class="studio-label">✍️ Apna Bahana Type Karein:</label>
+            <textarea id="input-clash-excuse" class="detector-textarea" rows="3" placeholder="Yahan apna sab se solid bahana likhein..."></textarea>
+          </div>
+
+          <div class="studio-btn-wrap" style="margin-top: 20px;">
+            <button id="btn-submit-clash-turn" class="giant-bahana-btn">
+              <span id="btn-turn-label">Agla Dost ➡️</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PHASE 3: VOTING ARENA -->
+        <div class="clash-phase" id="clash-phase-vote" style="display: none;">
+          <div class="vote-arena-header">
+            <span class="status-pill">🗳️ Live Voting Time!</span>
+            <h3 class="clash-vote-title">Kaun Sa Bahana Sab Se Top Hai?</h3>
+            <p class="clash-vote-sub">Sab dost mil kar parhein aur sab se funny/creative bahane pe vote click karein!</p>
+          </div>
+
+          <div class="clash-cards-grid" id="clash-voting-cards">
+            <!-- Dynamically populated voting cards -->
+          </div>
+
+          <div class="studio-btn-wrap" style="margin-top: 26px;">
+            <button id="btn-reveal-clash-winner" class="giant-bahana-btn winner-btn">
+              <span>🏆 RESULT / WINNER DIKHAO !</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PHASE 4: WINNER PODIUM & LEADERBOARD -->
+        <div class="clash-phase" id="clash-phase-podium" style="display: none;">
+          <div class="winner-trophy-header">
+            <div class="winner-crown-anim">👑</div>
+            <h3 class="winner-title" id="clash-winner-name">Ali Jeet Gaya!</h3>
+            <span class="winner-subtitle-tag" id="clash-winner-title">👑 Sultan-e-Bahana (Ultimate Liar)</span>
+          </div>
+
+          <!-- Winning Card Showcase -->
+          <div class="winning-card-box">
+            <div class="winning-ribbon">🥇 WINNING BAHANA</div>
+            <p class="winning-text" id="clash-winner-excuse">"..."</p>
+            <div class="winning-stats">
+              <span id="clash-winner-votes-badge">🔥 Votes: 0</span>
+              <span>🏆 Status: 100% Mohalla Certified</span>
+            </div>
+          </div>
+
+          <!-- Full Leaderboard Table -->
+          <div class="clash-leaderboard">
+            <h4>📊 Full Scoreboard:</h4>
+            <div class="leaderboard-list" id="clash-leaderboard-list">
+              <!-- Dynamically populated scoreboard rows -->
+            </div>
+          </div>
+
+          <div class="podium-actions">
+            <button id="btn-share-clash-result" class="action-btn share-btn">
+              <span>📲 Share Result With Friends</span>
+            </button>
+            <button id="btn-play-again-clash" class="action-btn copy-btn">
+              <span>🔄 Naya Match Khelo</span>
+            </button>
           </div>
         </div>
       </div>

@@ -1847,6 +1847,339 @@ textarea:focus-visible {
 }
 
 /* ==========================================================================
+   FRIENDS BAHANA SHOWDOWN STYLES
+   ========================================================================== */
+.friends-clash-card {
+  background: var(--bg-surface);
+  border: 2px solid var(--text-primary);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: 0 10px 0 var(--text-primary);
+}
+
+.clash-situation-box {
+  margin-bottom: 22px;
+}
+
+.clash-players-setup {
+  margin-bottom: 20px;
+}
+
+.clash-players-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.player-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-avatar-badge {
+  background: var(--bg-soft-purple);
+  color: var(--primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  white-space: nowrap;
+}
+
+.clash-player-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tiny-btn.warning {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+.tiny-btn.warning:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+}
+
+/* Phase 2: Turn Input */
+.turn-banner {
+  background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+  border: 2px dashed var(--primary);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.turn-badge {
+  font-size: 0.8rem;
+  font-weight: 800;
+  background: var(--primary);
+  color: #FFFFFF;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.turn-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.turn-sub {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.clash-prompt-reminder {
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  color: #92400E;
+}
+
+/* Phase 3: Voting Arena */
+.vote-arena-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.clash-vote-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 8px 0 4px;
+}
+
+.clash-vote-sub {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.clash-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.clash-vote-card {
+  background: var(--bg-main);
+  border: 2px solid var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: 0 6px 0 var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition-bounce);
+}
+
+.clash-vote-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--text-primary);
+}
+
+.clash-card-author-pill {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 800;
+  background: var(--yellow);
+  color: #78350F;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+  margin-bottom: 12px;
+}
+
+.clash-card-quote {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.clash-card-vote-btn {
+  background: linear-gradient(135deg, var(--coral) 0%, #E63946 100%);
+  color: #FFFFFF;
+  border: 2px solid var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--text-primary);
+  transition: var(--transition-bounce);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.clash-card-vote-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--text-primary);
+}
+
+.clash-card-vote-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--text-primary);
+}
+
+.clash-card-vote-btn.voted {
+  background: var(--mint);
+  border-color: #065F46;
+}
+
+/* Phase 4: Winner Podium */
+.winner-trophy-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.winner-crown-anim {
+  font-size: 3.5rem;
+  animation: wobble 2s infinite ease-in-out;
+}
+
+.winner-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.winner-subtitle-tag {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  background: var(--yellow);
+  color: #78350F;
+  padding: 4px 16px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.winning-card-box {
+  background: linear-gradient(135deg, #FFFDF0 0%, #FEF3C7 100%);
+  border: 3px solid #F59E0B;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 10px 0 #B45309, 0 10px 30px rgba(245, 158, 11, 0.25);
+  margin-bottom: 26px;
+  animation: goldShimmer 2s infinite alternate;
+}
+
+.winning-ribbon {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #F59E0B;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 4px 18px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
+}
+
+.winning-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1E1B2E;
+  text-align: center;
+  line-height: 1.4;
+  margin: 14px 0;
+}
+
+.winning-stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #92400E;
+}
+
+.clash-leaderboard {
+  background: var(--bg-main);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.clash-leaderboard h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leaderboard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-weight: 700;
+}
+
+.leaderboard-row.rank-1 {
+  border-color: #F59E0B;
+  background: #FEF3C7;
+  color: #78350F;
+}
+
+.leaderboard-row.rank-2 {
+  border-color: #94A3B8;
+  background: #F1F5F9;
+  color: #334155;
+}
+
+.leaderboard-row.rank-3 {
+  border-color: #CD7F32;
+  background: #FFEDD5;
+  color: #7C2D12;
+}
+
+.podium-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
    RESPONSIVE DESIGN (MOBILE FIRST)
    ========================================================================== */
 @media (max-width: 640px) {

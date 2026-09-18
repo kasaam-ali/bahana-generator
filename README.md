@@ -39,6 +39,14 @@ A viral, polished, hilarious, and curiosity-driven single-page web game built wi
 - Real-time voting buttons with crowd commentary banter.
 - Keeps track of battle votes locally.
 
+### 4. 👥 Friends Bahana Showdown (Party Game: Kis Ka Bahana Sab Se Top Hai?)
+- Pass-and-play party game for 2 to 5 friends:
+  - Pick or write a shared situation (e.g., *Pizza treat se bachna*, *2 ghante late hona*).
+  - Turn-by-turn secret excuse entry for each friend.
+  - Interactive voting arena where everyone votes for the funniest/worst bahana.
+  - Grand **Winner Podium & Trophy Ceremony** with funny desi titles (*👑 Sultan-e-Bahana*, *🎭 Drama Academy Gold Medalist*).
+  - One-click WhatsApp result summary share button.
+
 ### 4. 🧪 Bahana Mixology Studio (Make Your Own)
 - Custom formula mixer:
   - Pick **Situation** (Office late, Missed wedding, Pending assignment...)

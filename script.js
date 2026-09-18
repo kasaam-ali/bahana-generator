@@ -868,6 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initChallengeBanner();
   initModalClose();
   initUserSubmissions();
+  initFriendsShowdown();
 
   // Generate deterministic Daily Bahana or Initial random
   loadInitialExcuse();
@@ -1947,5 +1948,279 @@ function deleteUserBahana(id) {
   } catch (e) {
     console.error("Error deleting bahana", e);
   }
+}
+
+// ============================================================================
+// 18. FRIENDS BAHANA SHOWDOWN (PARTY PASS-AND-PLAY GAME)
+// ============================================================================
+const CLASH_STATE = {
+  situation: "",
+  players: [],
+  currentTurnIndex: 0
+};
+
+function initFriendsShowdown() {
+  const sitSelect = document.getElementById('select-clash-situation');
+  const customSitInput = document.getElementById('input-clash-custom-situation');
+  const addPlayerBtn = document.getElementById('btn-add-clash-player');
+  const removePlayerBtn = document.getElementById('btn-remove-clash-player');
+  const startBtn = document.getElementById('btn-start-clash-game');
+  const submitTurnBtn = document.getElementById('btn-submit-clash-turn');
+  const revealWinnerBtn = document.getElementById('btn-reveal-clash-winner');
+  const playAgainBtn = document.getElementById('btn-play-again-clash');
+  const shareClashBtn = document.getElementById('btn-share-clash-result');
+
+  // Toggle custom situation input
+  sitSelect?.addEventListener('change', (e) => {
+    if (customSitInput) {
+      customSitInput.style.display = e.target.value === 'custom' ? 'block' : 'none';
+      if (e.target.value === 'custom') customSitInput.focus();
+    }
+  });
+
+  // Add player row (max 5)
+  addPlayerBtn?.addEventListener('click', () => {
+    const inputsContainer = document.getElementById('clash-players-inputs');
+    const count = inputsContainer?.querySelectorAll('.player-input-row').length || 0;
+    if (count >= 5) {
+      showToast('Maximum 5 players allow hain!');
+      return;
+    }
+    sfx.playClick();
+    const newIdx = count + 1;
+    const div = document.createElement('div');
+    div.className = 'player-input-row';
+    div.innerHTML = `
+      <span class="player-avatar-badge">👤 P${newIdx}</span>
+      <input type="text" class="clash-player-name studio-select" placeholder="Dost ${newIdx} ka naam" value="Dost ${newIdx}" maxlength="20" />
+    `;
+    inputsContainer?.appendChild(div);
+  });
+
+  // Remove player row (min 2)
+  removePlayerBtn?.addEventListener('click', () => {
+    const inputsContainer = document.getElementById('clash-players-inputs');
+    const rows = inputsContainer?.querySelectorAll('.player-input-row');
+    if (!rows || rows.length <= 2) {
+      showToast('Muqablay ke liye kam az kam 2 players zaroori hain!');
+      return;
+    }
+    sfx.playClick();
+    rows[rows.length - 1].remove();
+  });
+
+  // Start game button
+  startBtn?.addEventListener('click', () => {
+    const inputs = document.querySelectorAll('.clash-player-name');
+    const names = [];
+    inputs.forEach((inp) => {
+      const val = inp.value.trim();
+      if (val) names.push(val);
+    });
+
+    if (names.length < 2) {
+      showToast('Kam az kam 2 doston ke naam likhein! ✍️');
+      return;
+    }
+
+    let situationText = sitSelect?.options[sitSelect.selectedIndex]?.text || "Musibat se bachna hai";
+    if (sitSelect?.value === 'custom') {
+      const customVal = customSitInput?.value.trim();
+      if (!customVal) {
+        showToast('Apni custom situation toh likhein! ✍️');
+        customSitInput?.focus();
+        return;
+      }
+      situationText = customVal;
+    }
+
+    sfx.playFanfare();
+    CLASH_STATE.situation = situationText;
+    CLASH_STATE.players = names.map((name) => ({ name, excuse: "", votes: 0 }));
+    CLASH_STATE.currentTurnIndex = 0;
+
+    // Show Phase 2
+    showClashPhase('input');
+    renderClashTurn();
+  });
+
+  // Turn submit button
+  submitTurnBtn?.addEventListener('click', () => {
+    const excuseInput = document.getElementById('input-clash-excuse');
+    const val = excuseInput?.value.trim();
+
+    if (!val || val.length < 3) {
+      sfx.playBuzzer();
+      showToast('Apna bahana toh likhein pehle! ✍️');
+      excuseInput?.focus();
+      return;
+    }
+
+    sfx.playPop();
+    CLASH_STATE.players[CLASH_STATE.currentTurnIndex].excuse = val;
+    if (excuseInput) excuseInput.value = '';
+
+    CLASH_STATE.currentTurnIndex++;
+
+    if (CLASH_STATE.currentTurnIndex < CLASH_STATE.players.length) {
+      // Next player's turn
+      renderClashTurn();
+    } else {
+      // All done, go to voting
+      sfx.playFanfare();
+      confetti.burst(60);
+      showClashPhase('vote');
+      renderClashVotingArena();
+    }
+  });
+
+  // Reveal winner
+  revealWinnerBtn?.addEventListener('click', () => {
+    sfx.playFanfare();
+    confetti.burst(100, true);
+    showClashPhase('podium');
+    renderClashPodium();
+  });
+
+  // Play again
+  playAgainBtn?.addEventListener('click', () => {
+    sfx.playClick();
+    showClashPhase('setup');
+  });
+
+  // Share result
+  shareClashBtn?.addEventListener('click', () => {
+    const sorted = [...CLASH_STATE.players].sort((a, b) => b.votes - a.votes);
+    const winner = sorted[0];
+    const shareText = `🏆 Friends Bahana Showdown Winner: *${winner.name}*! 😂\nSituation: "${CLASH_STATE.situation}"\nWinning Bahana: "${winner.excuse}"\nVotes: ${winner.votes}\nCertified Shahi Liar! 👑\nBaqi dost haar gaye! Khelo Bahana Lab: ${window.location.href}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: '🏆 Friends Bahana Showdown Winner!',
+        text: shareText,
+        url: window.location.href
+      }).catch(() => copyChallengeFallback(shareText));
+    } else {
+      copyChallengeFallback(shareText);
+    }
+  });
+}
+
+function showClashPhase(phase) {
+  const pSetup = document.getElementById('clash-phase-setup');
+  const pInput = document.getElementById('clash-phase-input');
+  const pVote = document.getElementById('clash-phase-vote');
+  const pPodium = document.getElementById('clash-phase-podium');
+
+  if (pSetup) pSetup.style.display = phase === 'setup' ? 'block' : 'none';
+  if (pInput) pInput.style.display = phase === 'input' ? 'block' : 'none';
+  if (pVote) pVote.style.display = phase === 'vote' ? 'block' : 'none';
+  if (pPodium) pPodium.style.display = phase === 'podium' ? 'block' : 'none';
+
+  document.getElementById('friends-clash-card')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderClashTurn() {
+  const current = CLASH_STATE.players[CLASH_STATE.currentTurnIndex];
+  const badge = document.getElementById('clash-turn-badge');
+  const heading = document.getElementById('clash-turn-player-name');
+  const sitReminder = document.getElementById('clash-reminder-situation');
+  const btnLabel = document.getElementById('btn-turn-label');
+
+  if (badge) badge.textContent = `Player ${CLASH_STATE.currentTurnIndex + 1} of ${CLASH_STATE.players.length}`;
+  if (heading) heading.textContent = `${current.name} ki baari hai! 🤫`;
+  if (sitReminder) sitReminder.textContent = CLASH_STATE.situation;
+  if (btnLabel) {
+    btnLabel.textContent = (CLASH_STATE.currentTurnIndex + 1 === CLASH_STATE.players.length) 
+      ? 'Sab Ka Ho Gaya! Voting Shuru Karo 🗳️' 
+      : 'Agla Dost ➡️';
+  }
+
+  setMascotState('suspicious', `${current.name}, kisi ko dikhana mat, sab se khatarnak jhoot likho!`);
+}
+
+function renderClashVotingArena() {
+  const cardsContainer = document.getElementById('clash-voting-cards');
+  if (!cardsContainer) return;
+  cardsContainer.innerHTML = '';
+
+  CLASH_STATE.players.forEach((player, idx) => {
+    const card = document.createElement('div');
+    card.className = 'clash-vote-card';
+    card.innerHTML = `
+      <div>
+        <span class="clash-card-author-pill">👤 ${player.name}</span>
+        <p class="clash-card-quote">"${player.excuse}"</p>
+      </div>
+      <button class="clash-card-vote-btn" data-index="${idx}">
+        <span>Vote For ${player.name} 🔥</span>
+        <span class="vote-tag-num">(${player.votes})</span>
+      </button>
+    `;
+    cardsContainer.appendChild(card);
+  });
+
+  // Attach vote events
+  cardsContainer.querySelectorAll('.clash-card-vote-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      sfx.playPop();
+      confetti.burst(30);
+      const idx = parseInt(btn.dataset.index, 10);
+      CLASH_STATE.players[idx].votes++;
+      
+      const numSpan = btn.querySelector('.vote-tag-num');
+      if (numSpan) numSpan.textContent = `(${CLASH_STATE.players[idx].votes})`;
+      btn.classList.add('voted');
+      setTimeout(() => btn.classList.remove('voted'), 400);
+
+      showToast(`Vote recorded for ${CLASH_STATE.players[idx].name}! 🔥`);
+      setMascotState('laughing', `Audience ${CLASH_STATE.players[idx].name} ke bahane pe hass rahi hai!`);
+    });
+  });
+
+  setMascotState('laughing', "Sab dost mil kar vote karein, kaun sa bahana sab se top hai!");
+}
+
+function renderClashPodium() {
+  // Sort players by votes descending
+  const sorted = [...CLASH_STATE.players].sort((a, b) => b.votes - a.votes);
+  const winner = sorted[0];
+
+  const winnerName = document.getElementById('clash-winner-name');
+  const winnerExcuse = document.getElementById('clash-winner-excuse');
+  const winnerVotes = document.getElementById('clash-winner-votes-badge');
+  const winnerTitle = document.getElementById('clash-winner-title');
+  const lbList = document.getElementById('clash-leaderboard-list');
+
+  const titles = [
+    "👑 Sultan-e-Bahana (Supreme Deceiver)",
+    "🎭 National Drama Academy Gold Medalist",
+    "🌟 Oscar Award For Desi Acting",
+    "🩴 Chappal Escape Grandmaster"
+  ];
+  const chosenTitle = titles[Math.floor(Math.random() * titles.length)];
+
+  if (winnerName) winnerName.textContent = `${winner.name} Jeet Gaya! 🏆`;
+  if (winnerExcuse) winnerExcuse.textContent = `"${winner.excuse}"`;
+  if (winnerVotes) winnerVotes.textContent = `🔥 Total Votes: ${winner.votes}`;
+  if (winnerTitle) winnerTitle.textContent = chosenTitle;
+
+  if (lbList) {
+    lbList.innerHTML = '';
+    sorted.forEach((p, idx) => {
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+      const row = document.createElement('div');
+      row.className = `leaderboard-row rank-${idx + 1}`;
+      row.innerHTML = `
+        <span>${medals[idx] || '🎖️'} <strong>${p.name}</strong></span>
+        <span>${p.votes} Votes</span>
+      `;
+      lbList.appendChild(row);
+    });
+  }
+
+  incrementLaughs(10);
+  trackMysteryAction();
+  setMascotState('legendary', `Mubarak ho ${winner.name}! Tum dosti ke sab se bare fraudie sabit hue! 😂`);
 }
 
