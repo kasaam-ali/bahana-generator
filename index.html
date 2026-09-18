@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>😂 Bahana Generator v2.0 — Desi Excuse Lab</title>
+  <meta name="description" content="Click karo, izzat bachao, aur situation ko aur kharab karo! The ultimate funny Desi & Pakistani excuse generator, battle arena, and fake lie detector." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Confetti Canvas Background -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Sound Toggle & Quick Access Bar -->
+  <div class="top-nav-bar">
+    <div class="nav-brand">
+      <span class="brand-emoji">😂</span>
+      <span class="brand-title">BAHANA LAB</span>
+      <span class="badge-pill v-tag">v2.0</span>
+    </div>
+    <div class="nav-controls">
+      <button id="sound-toggle-btn" class="nav-btn" aria-label="Toggle Sound Effects" title="Sound FX (On/Off)">
+        <span id="sound-icon">🔊</span>
+        <span class="btn-text">Audio</span>
+      </button>
+      <button id="dark-mystery-btn" class="nav-btn mystery-nav-btn" aria-label="Mystery Mode" title="Bahana Lab After Dark">
+        <span id="mystery-nav-icon">🔒</span>
+        <span class="btn-text">After Dark</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="app-container">
+    <!-- HERO / MAIN SECTION -->
+    <header class="hero-section">
+      <div class="badge-wrapper">
+        <span class="status-pill pulse-animation">🔥 Desi Excuse Lab • Live & Suspicious</span>
+      </div>
+      <h1 class="main-heading">
+        Aaj Ka <span class="gradient-text">Bahana</span> Kya Hai?
+      </h1>
+      <p class="hero-subtitle">
+        Click karo, izzat bachao, aur situation ko aur kharab karo! 😂
+      </p>
+
+      <!-- Dynamic Witty Ticker -->
+      <div class="ticker-box" id="ticker-box">
+        <span class="ticker-icon">📢</span>
+        <span id="ticker-text" class="ticker-text">Loading Mohalla intel...</span>
+      </div>
+
+      <!-- Stats Bar (Streak, Laughs, Mystery Unlock Progress) -->
+      <div class="stats-dashboard">
+        <div class="stat-card">
+          <span class="stat-icon">🔥</span>
+          <div class="stat-info">
+            <span class="stat-num" id="stat-streak">0</span>
+            <span class="stat-label">Bahana Streak</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">😂</span>
+          <div class="stat-info">
+            <span class="stat-num" id="stat-laughs">0</span>
+            <span class="stat-label">Total Laughs</span>
+          </div>
+        </div>
+        <div class="stat-card stat-progress-card">
+          <div class="stat-progress-header">
+            <span class="stat-icon">🔮</span>
+            <span class="stat-label">Mystery Mode: <span id="unlock-count-text">0/10</span></span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="mystery-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MASCOT & MAIN INTERACTION CONTAINER -->
+    <section class="generator-arena">
+      <!-- Reactive Mascot: Billo the Suspicious Desi Cat -->
+      <div class="mascot-wrapper" id="mascot-container">
+        <div class="speech-bubble" id="mascot-bubble">
+          <p id="mascot-text">"Bhai mujhe sab pata hai, batao kya scene hai?"</p>
+          <div class="bubble-tail"></div>
+        </div>
+        <div class="mascot-avatar" id="mascot-avatar" role="img" aria-label="Billo the Mascot">
+          <!-- Animated Interactive Mascot SVG -->
+          <svg viewBox="0 0 200 200" class="mascot-svg" id="mascot-svg">
+            <defs>
+              <linearGradient id="catBody" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FF9E7D" />
+                <stop offset="100%" stop-color="#FF5E62" />
+              </linearGradient>
+              <linearGradient id="earInner" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFE3D8" />
+                <stop offset="100%" stop-color="#FFA8A8" />
+              </linearGradient>
+            </defs>
+            <!-- Ears -->
+            <polygon points="50,40 25,95 80,85" fill="#FF5E62" class="cat-ear ear-left" />
+            <polygon points="52,48 35,90 75,85" fill="url(#earInner)" />
+            <polygon points="150,40 175,95 120,85" fill="#FF5E62" class="cat-ear ear-right" />
+            <polygon points="148,48 165,90 125,85" fill="url(#earInner)" />
+            
+            <!-- Head Body -->
+            <circle cx="100" cy="115" r="70" fill="url(#catBody)" filter="drop-shadow(0 8px 16px rgba(255,94,98,0.3))" />
+            
+            <!-- Cheeks Blush -->
+            <ellipse cx="62" cy="128" rx="12" ry="7" fill="#FF2E93" opacity="0.35" />
+            <ellipse cx="138" cy="128" rx="12" ry="7" fill="#FF2E93" opacity="0.35" />
+
+            <!-- Dynamic Eyes Group -->
+            <g id="mascot-eyes" class="eyes-neutral">
+              <!-- Left Eye -->
+              <ellipse id="eye-left-sclera" cx="72" cy="105" rx="14" ry="16" fill="#FFFFFF" />
+              <ellipse id="pupil-left" cx="74" cy="105" rx="7" ry="9" fill="#201E35" />
+              <circle cx="71" cy="101" r="3" fill="#FFFFFF" />
+              <!-- Right Eye -->
+              <ellipse id="eye-right-sclera" cx="128" cy="105" rx="14" ry="16" fill="#FFFFFF" />
+              <ellipse id="pupil-right" cx="126" cy="105" rx="7" ry="9" fill="#201E35" />
+              <circle cx="123" cy="101" r="3" fill="#FFFFFF" />
+            </g>
+
+            <!-- Eyebrows -->
+            <path id="eyebrow-left" d="M 58 84 Q 72 80 84 85" stroke="#7A2222" stroke-width="4" stroke-linecap="round" fill="none" />
+            <path id="eyebrow-right" d="M 116 85 Q 128 80 142 84" stroke="#7A2222" stroke-width="4" stroke-linecap="round" fill="none" />
+
+            <!-- Nose -->
+            <polygon points="95,124 105,124 100,131" fill="#7A2222" />
+
+            <!-- Whiskers -->
+            <line x1="32" y1="122" x2="60" y2="124" stroke="#FFEAE2" stroke-width="3" stroke-linecap="round" />
+            <line x1="30" y1="133" x2="60" y2="131" stroke="#FFEAE2" stroke-width="3" stroke-linecap="round" />
+            <line x1="140" y1="124" x2="168" y2="122" stroke="#FFEAE2" stroke-width="3" stroke-linecap="round" />
+            <line x1="140" y1="131" x2="170" y2="133" stroke="#FFEAE2" stroke-width="3" stroke-linecap="round" />
+
+            <!-- Mouth -->
+            <path id="mascot-mouth" d="M 90,133 Q 100,140 100,133 Q 100,140 110,133" stroke="#7A2222" stroke-width="3.5" stroke-linecap="round" fill="none" />
+
+            <!-- Suspicious / Cool Sunglasses (Hidden by default, shown in After Dark / Legendary) -->
+            <g id="mascot-sunglasses" style="display: none;">
+              <polygon points="50,90 94,92 90,122 56,120" fill="#111827" />
+              <polygon points="106,92 150,90 144,120 110,122" fill="#111827" />
+              <line x1="94" y1="95" x2="106" y2="95" stroke="#111827" stroke-width="5" />
+              <line x1="56" y1="96" x2="80" y2="114" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" opacity="0.8" />
+              <line x1="112" y1="96" x2="136" y2="114" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" opacity="0.8" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Giant Primary Bahana Button -->
+      <div class="cta-center">
+        <button id="btn-generate-bahana" class="giant-bahana-btn" aria-label="Generate Bahana">
+          <span class="btn-shine"></span>
+          <span class="btn-emoji-shake">🎲</span>
+          <span class="btn-main-text">BAHANA DO !</span>
+        </button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-scroll-container" role="region" aria-label="Bahana Categories">
+        <div class="category-pills" id="category-pills">
+          <button class="cat-pill active" data-category="all">✨ All Random</button>
+          <button class="cat-pill" data-category="Student">📚 Student</button>
+          <button class="cat-pill" data-category="Office">💼 Office</button>
+          <button class="cat-pill" data-category="Late Arrival">⏰ Late Arrival</button>
+          <button class="cat-pill" data-category="Desi Family">🧕 Desi Family</button>
+          <button class="cat-pill" data-category="Relationship">💔 Relationship</button>
+          <button class="cat-pill" data-category="Friends">🍕 Friends</button>
+          <button class="cat-pill" data-category="Universal">🌍 Universal</button>
+          <button class="cat-pill" data-category="Exam Survival">📝 Exam Survival</button>
+          <button class="cat-pill" data-category="Online Meeting">💻 Online Meeting</button>
+          <button class="cat-pill" data-category="Pakistani Daily Life">🇵🇰 Pakistani Life</button>
+        </div>
+      </div>
+
+      <!-- ACTIVE EXCUSE DISPLAY CARD -->
+      <div class="excuse-card-wrapper" id="excuse-card-container">
+        <div class="excuse-card" id="excuse-card">
+          <!-- Card Header & Badge -->
+          <div class="card-meta">
+            <div class="badge-group">
+              <span class="category-tag" id="card-category">✨ Universal</span>
+              <span class="daily-tag" id="card-daily-badge" style="display: none;">🌟 Today's Daily Bahana</span>
+              <span class="escalated-tag" id="card-escalated-badge" style="display: none;">🤯 Escalated Level</span>
+            </div>
+            <span class="risk-level-badge" id="card-risk-level">Risk: Safe-ish 🟢</span>
+          </div>
+
+          <!-- Main Excuse Text -->
+          <div class="excuse-quote-box">
+            <span class="quote-mark left">“</span>
+            <p class="excuse-text" id="card-excuse-text">
+              "Bhai, assignment complete tha, lekin laptop ne aaj emotional leave le li."
+            </p>
+            <span class="quote-mark right">”</span>
+          </div>
+
+          <!-- Meters: Absurdity & Suspicion -->
+          <div class="meters-container">
+            <div class="meter-item">
+              <div class="meter-labels">
+                <span class="meter-title">Absurdity Level</span>
+                <span class="meter-val" id="meter-absurdity-val">85%</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill fill-absurdity" id="meter-absurdity-bar" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-item">
+              <div class="meter-labels">
+                <span class="meter-title">How Suspicious Is This?</span>
+                <span class="meter-val" id="meter-suspicion-val">92%</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill fill-suspicion" id="meter-suspicion-bar" style="width: 92%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Action Buttons -->
+          <div class="card-actions-grid">
+            <button id="btn-copy-bahana" class="action-btn copy-btn" title="Copy text to clipboard">
+              <span class="btn-icon">📋</span>
+              <span>Copy Bahana</span>
+            </button>
+            <button id="btn-share-bahana" class="action-btn share-btn" title="Share via WhatsApp or Apps">
+              <span class="btn-icon">📲</span>
+              <span>Share</span>
+            </button>
+            <button id="btn-make-worse" class="action-btn worse-btn" title="Make this excuse 100x more absurd!">
+              <span class="btn-icon">🤯</span>
+              <span>Make It Worse!</span>
+            </button>
+            <button id="btn-send-to-detector" class="action-btn test-btn" title="Test in Fake Lie Detector">
+              <span class="btn-icon">🕵️</span>
+              <span>Test Legitimacy</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION TABS / MINI-GAMES NAV -->
+    <nav class="sub-nav-tabs">
+      <button class="sub-tab-btn active" data-target="section-battle">🎭 Bahana Battle</button>
+      <button class="sub-tab-btn" data-target="section-custom">🧪 Bahana Studio</button>
+      <button class="sub-tab-btn" data-target="section-detector">🕵️ Lie Detector</button>
+      <button class="sub-tab-btn" data-target="section-curiosity">👀 Secret Vault</button>
+    </nav>
+
+    <!-- 1. BAHANA BATTLE SECTION -->
+    <section id="section-battle" class="game-section sub-section-view active">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">🎭 Bahana Battle: Kaun Jeetega?</h2>
+        <p class="section-desc">Do zaleel bahanon ka aamna-samna. Chunao karo kaun sa zyada dhasu hai!</p>
+      </div>
+
+      <div class="battle-arena-grid">
+        <!-- Battle Option A -->
+        <div class="battle-card" id="battle-card-a">
+          <div class="battle-badge">Option A</div>
+          <p class="battle-text" id="battle-text-a">"Meri battery 1% thi aur charger chachi ke ghar chala gaya."</p>
+          <div class="battle-vote-action">
+            <button class="vote-btn" id="btn-vote-a">
+              <span>Vote For A 🔥</span>
+            </button>
+            <span class="vote-count-label" id="vote-count-a">Votes: 0</span>
+          </div>
+        </div>
+
+        <div class="battle-divider">
+          <span class="vs-pill">VS</span>
+        </div>
+
+        <!-- Battle Option B -->
+        <div class="battle-card" id="battle-card-b">
+          <div class="battle-badge">Option B</div>
+          <p class="battle-text" id="battle-text-b">"Mera phone mujhe ignore kar raha tha, notifications aayi hi nahi."</p>
+          <div class="battle-vote-action">
+            <button class="vote-btn" id="btn-vote-b">
+              <span>Vote For B 🚀</span>
+            </button>
+            <span class="vote-count-label" id="vote-count-b">Votes: 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Battle Commentary & Controls -->
+      <div class="battle-footer">
+        <div class="commentary-box" id="battle-commentary">
+          <span class="com-icon">🎤</span>
+          <span id="battle-commentary-text">Chalo vote do! Audience faisla karegi.</span>
+        </div>
+        <button id="btn-next-battle" class="secondary-btn">
+          <span>Naya Matchup Lao 🔄</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. MAKE YOUR OWN BAHANA (STUDIO) -->
+    <section id="section-custom" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">🧪 Bahana Mixology Studio</h2>
+        <p class="section-desc">Apni situation ke mutabiq customize bahana tayyar karo!</p>
+      </div>
+
+      <div class="custom-studio-card">
+        <div class="studio-form-grid">
+          <!-- Situation Picker -->
+          <div class="studio-input-group">
+            <label for="select-situation" class="studio-label">📍 Situation (Musibat):</label>
+            <select id="select-situation" class="studio-select">
+              <option value="late_office">Late for Office / Boss ka phone</option>
+              <option value="missed_wedding">Shaadi attend nahi ki</option>
+              <option value="pending_assignment">Assignment submit nahi hua</option>
+              <option value="ghosted_call">Dost ka call cut kar diya</option>
+              <option value="broke_plans">Aakhri time pe plan cancel kiya</option>
+              <option value="chores_avoid">Ghar ke sauda salaf se bachna</option>
+            </select>
+          </div>
+
+          <!-- Style Picker -->
+          <div class="studio-input-group">
+            <label for="select-style" class="studio-label">🎭 Excuse Style (Andaaz):</label>
+            <select id="select-style" class="studio-select">
+              <option value="medical_drama">Over-Dramatic Medical Catastrophe 🚑</option>
+              <option value="technical_glitch">Illuminati Tech Glitch 💻</option>
+              <option value="family_crisis">Rishtedar & Khandan Emergency 🧕</option>
+              <option value="philosophical">Deep Existential Philosophy 🌌</option>
+              <option value="traffic_chaos">Desi Traffic & Load-Shedding 🚦</option>
+            </select>
+          </div>
+
+          <!-- Absurdity Level -->
+          <div class="studio-input-group full-width">
+            <label for="range-absurdity" class="studio-label">
+              🎚️ Absurdity Level: <span id="absurdity-level-label" class="highlight-val">Phuppo Alert (Level 4)</span>
+            </label>
+            <input type="range" id="range-absurdity" min="1" max="5" value="4" class="custom-slider" />
+            <div class="slider-marks">
+              <span>Mellow</span>
+              <span>Suspicious</span>
+              <span>Chaos</span>
+              <span>Phuppo Alert</span>
+              <span>Intergalactic</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="studio-btn-wrap">
+          <button id="btn-mix-bahana" class="giant-bahana-btn mix-btn">
+            <span>TAIYYAR KARO 🧪</span>
+          </button>
+        </div>
+
+        <!-- Generated Custom Bahana Result Box -->
+        <div class="custom-result-card" id="custom-result-card" style="display: none;">
+          <div class="custom-badge-row">
+            <span class="badge-pill">✨ Handcrafted Bahana</span>
+            <span class="badge-pill risk" id="custom-risk-tag">Drama Index: 98%</span>
+          </div>
+          <p class="custom-bahana-text" id="custom-bahana-text"></p>
+          <div class="custom-action-row">
+            <button id="btn-copy-custom" class="action-btn copy-btn">📋 Copy</button>
+            <button id="btn-share-custom" class="action-btn share-btn">📲 Share</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FAKE LIE DETECTOR COMEDY MODE -->
+    <section id="section-detector" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">🕵️ Chacha's Comedy Lie Detector</h2>
+        <p class="section-desc">Apna bahana yahan dalo aur mohallay ke AI polygraph se verify karvao!</p>
+      </div>
+
+      <div class="detector-card">
+        <div class="detector-input-wrapper">
+          <label for="detector-input" class="visually-hidden">Enter excuse for lie test</label>
+          <textarea id="detector-input" class="detector-textarea" placeholder="Yahan apna bahana likhein ya neechay button se paste karein... (e.g. Bhai traffic bohat zyada tha)"></textarea>
+          <div class="detector-paste-row">
+            <button id="btn-paste-current" class="tiny-btn">
+              <span>Current Bahana Insert Karo 📥</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="detector-trigger-wrap">
+          <button id="btn-run-detector" class="giant-bahana-btn detector-btn">
+            <span class="scan-icon">🔍</span>
+            <span>CHECK KARO (SCAN)</span>
+          </button>
+        </div>
+
+        <!-- Scanning Animation Box -->
+        <div class="scan-animation-box" id="scan-animation-box" style="display: none;">
+          <div class="polygraph-line">
+            <div class="poly-pulse"></div>
+          </div>
+          <div class="scan-status-text" id="scan-status-text">Scanning eyebrow twitch...</div>
+          <div class="scan-progress-dots">
+            <span>.</span><span>.</span><span>.</span>
+          </div>
+        </div>
+
+        <!-- Detector Verdict Result -->
+        <div class="detector-result-card" id="detector-result-card" style="display: none;">
+          <div class="stamp-container">
+            <div class="official-stamp" id="verdict-stamp">APPROVED JHOOT</div>
+          </div>
+          <div class="verdict-details">
+            <div class="verdict-row">
+              <span class="v-label">Suspicion Index:</span>
+              <span class="v-value highlight-red" id="verdict-suspicion">94.7%</span>
+            </div>
+            <div class="verdict-row">
+              <span class="v-label">Confidence:</span>
+              <span class="v-value" id="verdict-confidence">Too much (dangerous)</span>
+            </div>
+            <div class="verdict-row">
+              <span class="v-label">Drama Level:</span>
+              <span class="v-value" id="verdict-drama">Pakistani Soap Opera</span>
+            </div>
+            <div class="verdict-commentary" id="verdict-commentary">
+              "Official Verdict: Bhai excuse mein logic kam, aur emotional blackmail 200% hai. Billo approved!"
+            </div>
+          </div>
+          <div class="detector-disclaimer">
+            ⚠️ <strong>Disclaimer:</strong> For fun only — Chacha is not legally accredited and this is not a real lie detector.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CURIOSITY VAULT: THINGS YOU PROBABLY SHOULDN'T CLICK -->
+    <section id="section-curiosity" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">👀 Things You Probably Shouldn't Click</h2>
+        <p class="section-desc">Khabardaar! Yahan woh raaz hain jo kisi rishtedar ya boss ke samne nahi khulne chahiye.</p>
+      </div>
+
+      <div class="curiosity-grid">
+        <!-- Mystery Card 1 -->
+        <div class="curiosity-card" data-secret="forbidden">
+          <div class="curiosity-icon">🚫</div>
+          <h3 class="curiosity-title">The Forbidden Excuse</h3>
+          <p class="curiosity-preview">Woh bahana jo agar Ammi ne sun lia toh chappal ready hai...</p>
+          <button class="curiosity-btn">Khol ke dekhein 🗝️</button>
+        </div>
+
+        <!-- Mystery Card 2 -->
+        <div class="curiosity-card" data-secret="100laughs">
+          <div class="curiosity-icon">🏆</div>
+          <h3 class="curiosity-title">What happens after 100 laughs?</h3>
+          <p class="curiosity-preview">Legends say a golden badge unlocks, or maybe Chacha gives you biryani.</p>
+          <button class="curiosity-btn">Check Status 📊</button>
+        </div>
+
+        <!-- Mystery Card 3 -->
+        <div class="curiosity-card" data-secret="redbutton">
+          <div class="curiosity-icon">🚨</div>
+          <h3 class="curiosity-title">The Suspicious Red Button</h3>
+          <p class="curiosity-preview">Kasam se keh rahay hain mat dabana. Kuch ajeeb ho jayega.</p>
+          <button class="curiosity-btn warning-btn">DO NOT CLICK ⚠️</button>
+        </div>
+
+        <!-- Mystery Card 4 -->
+        <div class="curiosity-card" data-secret="rawtruth">
+          <div class="curiosity-icon">💤</div>
+          <h3 class="curiosity-title">The Excuse Nobody Believes</h3>
+          <p class="curiosity-preview">The rawest, most dangerous truth in human history.</p>
+          <button class="curiosity-btn">Reveal Truth 🤫</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MYSTERY MODE OVERLAY / AFTER DARK SECTION -->
+    <section id="section-after-dark" class="after-dark-container" style="display: none;">
+      <div class="after-dark-inner">
+        <div class="after-dark-header">
+          <span class="moon-icon">🌙</span>
+          <h2>Bahana Lab After Dark 🤫</h2>
+          <span class="secret-tag">UNLOCKED</span>
+        </div>
+        <p class="after-dark-sub">
+          Midnight Desi Mode: Extra absurd, unhinged quantum excuses & impossible situations!
+        </p>
+
+        <div class="after-dark-card" id="impossible-bahana-card">
+          <span class="impossible-pill">🌌 Impossible Bahana</span>
+          <p class="impossible-text" id="impossible-bahana-text">
+            "Bro, main 1998 ke load-shedding time portal mein phans gaya tha, abhi wapas aaya hoon."
+          </p>
+          <div class="impossible-actions">
+            <button id="btn-gen-impossible" class="giant-bahana-btn dark-mode-btn">
+              <span>Agla Impossible Bahana Lao 🛸</span>
+            </button>
+            <button id="btn-copy-impossible" class="action-btn copy-btn">📋 Copy</button>
+          </div>
+        </div>
+
+        <button id="btn-exit-after-dark" class="secondary-btn light-text">
+          <span>Wapas Normal Mode Pe Jao ☀️</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SHARE CHALLENGE FLOATING CARD -->
+    <aside class="challenge-banner">
+      <div class="challenge-content">
+        <span class="challenge-emoji">🏆</span>
+        <div class="challenge-text">
+          <h4>Dost ko challenge karo!</h4>
+          <p>"Meri bahana creativity ko 94/100 mila 😂 Tumhara kitna aayega?"</p>
+        </div>
+      </div>
+      <button id="btn-share-challenge" class="challenge-btn">
+        <span>Copy Challenge 🚀</span>
+      </button>
+    </aside>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <p>Built with 💖, Chai, and 100% genuine excuses. Made for laughter & friends.</p>
+      <p class="footer-sub">No real feelings were hurt in the making of this generator. Share responsibly! 😂</p>
+    </footer>
+  </main>
+
+  <!-- COMEDY RANDOM EVENT MODAL -->
+  <div class="modal-backdrop" id="event-modal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-icon" id="event-modal-icon">🚨</div>
+      <h3 class="modal-title" id="event-modal-title">Aunty Has Entered The Chat!</h3>
+      <p class="modal-desc" id="event-modal-desc">
+        "Beta, phone pe kya kar rahay ho? Yeh bahana chacha ko bhi bhej dun?"
+      </p>
+      <div class="modal-action">
+        <button id="btn-close-modal" class="giant-bahana-btn modal-close-btn">
+          <span>Izzat Bachi, Close Karo 🏃‍♂️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION POPUP -->
+  <div class="toast-bubble" id="app-toast" role="alert" aria-live="polite">
+    <span class="toast-icon" id="toast-icon">📋</span>
+    <span class="toast-message" id="toast-message">Bahana copied to clipboard!</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
