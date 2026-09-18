@@ -39,7 +39,41 @@ A viral, polished, hilarious, and curiosity-driven single-page web game built wi
 - Real-time voting buttons with crowd commentary banter.
 - Keeps track of battle votes locally.
 
-### 4. 👥 Friends Bahana Showdown (Party Game: Kis Ka Bahana Sab Se Top Hai?)
+### 4. 😂 Meme Roulette & Meme Mode 🎰
+- Dedicated Meme Mode covering relatable desi scenarios:
+  - University life, Office & Boss, Desi family, Developers, AI students, Exams, "Bas 5 minutes", Late replies, and Client "small changes".
+- Real meme formats: **POV**, **Expectation vs Reality**, **Nobody:**, **When...**, **That moment when...**, **Me vs Also Me**, **Before vs After**.
+- Interactive slot-machine spinning animation, punchlines, and instant copy/share.
+
+### 5. 🚨 DO NOT PRESS Red Button
+- High-visibility red alert button with a dare: "DO NOT PRESS!".
+- 21 original hilarious desi outcomes, click counter, sound buzzers, and screen shakes.
+- Rare 1-in-21 **Cosmic Chaos Jackpot** with gold confetti, legendary mascot dance, and special dialogue.
+
+### 6. 📰 Bahana News Network (BNN 🚨)
+- Parody 24/7 breaking news broadcast card with live ticker, urgent bulletins, and detailed comedic reporting on runaway excuse-makers.
+- One-click "Generate Breaking Story" and "Broadcast News" sharing.
+
+### 7. 🏆 Badges & Achievements System
+- 7 unlockable badges with slide-down toast notifications:
+  - ✨ *Pehla Kadam* (Generate your first excuse)
+  - 🚨 *Red Button Rebel* (Defy warnings 5 times)
+  - 🎰 *Meme Connoisseur* (Spin Meme Roulette 5 times)
+  - 🤯 *Cosmic Disaster* (Escalate to Level 4 Catastrophe)
+  - 🧪 *Underground Chemist* (Discover Secret Bahana Lab)
+  - ⚔️ *Sultan of Votes* (Vote 5 times in Bahana Battle)
+  - 👥 *Showdown Champion* (Complete a Friends Showdown match)
+- Persisted locally with real-time unlocked tracker modal.
+
+### 8. 🧪 Secret Bahana Lab (Classified Synthesizer)
+- Hidden room accessed via secret clues (or clicking Billo the mascot 5 times).
+- Synthesize impossible excuse formulas with retro-terminal aesthetic and test secret passcodes (*CHAI*, *BILLO*, *SAMOSA*, *KARACHI*, *LAHORE*).
+
+### 9. 📸 Shareable Disaster Card Poster
+- Formatted social card modal ready for Instagram/WhatsApp screenshots.
+- Displays certified stamps, absurdity & suspicion ratings, and direct WhatsApp sharing.
+
+### 10. 👥 Friends Bahana Showdown (Party Game: Kis Ka Bahana Sab Se Top Hai?)
 - Pass-and-play party game for 2 to 5 friends:
   - Pick or write a shared situation (e.g., *Pizza treat se bachna*, *2 ghante late hona*).
   - Turn-by-turn secret excuse entry for each friend.

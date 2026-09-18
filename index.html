@@ -26,6 +26,13 @@
         <span class="btn-icon">✍️</span>
         <span class="btn-text">Add Bahana</span>
       </button>
+      <button id="btn-open-achievements" class="nav-btn achievements-nav-btn" aria-label="Achievements" title="View Unlocked Badges">
+        <span class="btn-icon">🏆</span>
+        <span class="btn-text">Badges (<span id="unlocked-achievements-count">0/7</span>)</span>
+      </button>
+      <button id="btn-secret-room-trigger" class="secret-eye-btn" aria-label="Secret Clue" title="Hmm... don't click this 👀">
+        👀
+      </button>
       <button id="sound-toggle-btn" class="nav-btn" aria-label="Toggle Sound Effects" title="Sound FX (On/Off)">
         <span id="sound-icon">🔊</span>
         <span class="btn-text">Audio</span>
@@ -158,13 +165,24 @@
         </div>
       </div>
 
-      <!-- Giant Primary Bahana Button -->
+      <!-- Giant Primary Bahana Button & DO NOT PRESS -->
       <div class="cta-center">
         <button id="btn-generate-bahana" class="giant-bahana-btn" aria-label="Generate Bahana">
           <span class="btn-shine"></span>
           <span class="btn-emoji-shake">🎲</span>
           <span class="btn-main-text">BAHANA DO !</span>
         </button>
+
+        <!-- 🚨 DO NOT PRESS CHAOS BUTTON -->
+        <div class="do-not-press-wrap">
+          <button id="btn-do-not-press" class="do-not-press-btn" aria-label="Do Not Press" title="Seriously, don't click this.">
+            <span class="pulse-ring"></span>
+            <span class="warning-icon">🚨</span>
+            <span class="dnp-text">DO NOT PRESS</span>
+            <span class="warning-icon">🚨</span>
+          </button>
+          <div class="dnp-bubble" id="dnp-response-bubble" style="display: none;"></div>
+        </div>
       </div>
 
       <!-- Category Filter Pills -->
@@ -248,6 +266,10 @@
               <span class="btn-icon">🕵️</span>
               <span>Test Legitimacy</span>
             </button>
+            <button id="btn-open-share-card" class="action-btn card-poster-btn" title="View Screenshot-Ready Disaster Card">
+              <span class="btn-icon">📸</span>
+              <span>Disaster Card</span>
+            </button>
           </div>
         </div>
       </div>
@@ -257,6 +279,8 @@
     <nav class="sub-nav-tabs">
       <button class="sub-tab-btn active" data-target="section-battle">🎭 Bahana Battle</button>
       <button class="sub-tab-btn" data-target="section-friends-clash">👥 Friends Showdown 🏆</button>
+      <button class="sub-tab-btn" data-target="section-memes">😂 Meme Roulette 🎰</button>
+      <button class="sub-tab-btn" data-target="section-bnn">📰 News Network 🚨</button>
       <button class="sub-tab-btn" data-target="section-custom">🧪 Bahana Studio</button>
       <button class="sub-tab-btn" data-target="section-detector">🕵️ Lie Detector</button>
       <button class="sub-tab-btn" data-target="section-curiosity">👀 Secret Vault</button>
@@ -701,6 +725,89 @@
       </div>
     </section>
 
+    <!-- 7. MEME MODE & MEME ROULETTE 🎰 -->
+    <section id="section-memes" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">😂 Meme Roulette 🎰</h2>
+        <p class="section-desc">POV, Expectation vs Reality, and relatable Desi situations! Spin the wheel!</p>
+      </div>
+
+      <div class="meme-roulette-card">
+        <!-- Spinning Wheel Box -->
+        <div class="meme-display-box" id="meme-display-box">
+          <div class="meme-category-badge" id="meme-format-badge">POV: University Student 📚</div>
+          <div class="meme-content-area" id="meme-content-area">
+            <h3 class="meme-setup-text" id="meme-setup-text">You opened your laptop at 9 PM to study for tomorrow's exam...</h3>
+            <div class="meme-punchline-box">
+              <span class="meme-punchline-label">Reality:</span>
+              <p class="meme-punchline-text" id="meme-punchline-text">3 hours later you're watching a YouTube documentary titled 'Why penguins don't live in Pakistan' 😭</p>
+            </div>
+          </div>
+          <!-- Mascot Live Reaction to Meme -->
+          <div class="meme-mascot-reaction" id="meme-mascot-reaction">
+            <span class="mascot-face-mini">🐱</span>
+            <span class="mascot-quote-mini" id="meme-mascot-quote">"BRO WHAT 😭 This is 100% accurate!"</span>
+          </div>
+        </div>
+
+        <div class="meme-controls-row">
+          <button id="btn-spin-meme" class="giant-bahana-btn spin-meme-btn">
+            <span class="spin-icon">🎰</span>
+            <span>SPIN THE MEME 🎰</span>
+          </button>
+        </div>
+
+        <div class="meme-action-buttons">
+          <button id="btn-another-meme" class="action-btn copy-btn">
+            <span>Another One 😂</span>
+          </button>
+          <button id="btn-copy-meme" class="action-btn copy-btn">
+            <span>📋 Copy Meme</span>
+          </button>
+          <button id="btn-share-meme" class="action-btn share-btn">
+            <span>📲 Share Meme</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. BAHANA NEWS NETWORK (BNN 📰) -->
+    <section id="section-bnn" class="game-section sub-section-view">
+      <div class="section-title-wrap">
+        <h2 class="section-heading">📰 Bahana News Network (BNN) 🚨</h2>
+        <p class="section-desc">24/7 Fictional Desi Mohalla Surveillance & Investigative Excuse Journalism!</p>
+      </div>
+
+      <div class="bnn-broadcast-card">
+        <div class="bnn-screen-header">
+          <div class="bnn-live-indicator">
+            <span class="live-dot"></span>
+            <span>LIVE BROADCAST</span>
+          </div>
+          <span class="bnn-channel-logo">BNN NEWS HD 📺</span>
+        </div>
+
+        <div class="bnn-headline-display" id="bnn-headline-box">
+          <div class="bnn-tag" id="bnn-tag">🚨 BREAKING NEWS</div>
+          <h3 class="bnn-headline" id="bnn-headline">Local student claims WiFi router took compassionate leave exactly 2 minutes before exam submission deadline.</h3>
+          <div class="bnn-anchor-commentary" id="bnn-anchor-commentary">
+            🎙️ <strong>Chacha News Anchor:</strong> "Radar systems confirm Mom's chappal is currently tracking suspect at supersonic speeds."
+          </div>
+        </div>
+
+        <div class="bnn-controls-row">
+          <button id="btn-generate-news" class="giant-bahana-btn bnn-btn">
+            <span>BREAKING NEWS LAO 🚨</span>
+          </button>
+        </div>
+
+        <div class="bnn-actions-row">
+          <button id="btn-copy-news" class="action-btn copy-btn">📋 Copy News</button>
+          <button id="btn-share-news" class="action-btn share-btn">📲 Share News Alert</button>
+        </div>
+      </div>
+    </section>
+
     <!-- 5. MYSTERY MODE OVERLAY / AFTER DARK SECTION -->
     <section id="section-after-dark" class="after-dark-container" style="display: none;">
       <div class="after-dark-inner">
@@ -773,6 +880,105 @@
   <div class="toast-bubble" id="app-toast" role="alert" aria-live="polite">
     <span class="toast-icon" id="toast-icon">📋</span>
     <span class="toast-message" id="toast-message">Bahana copied to clipboard!</span>
+  </div>
+
+  <!-- 🏆 ACHIEVEMENTS POPUP MODAL -->
+  <div class="modal-backdrop" id="achievements-modal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card achievements-modal-card">
+      <div class="modal-icon">🏆</div>
+      <h3 class="modal-title">Bahana Lab Achievements</h3>
+      <p class="modal-desc">Aap ke tamam unlock kiye hue badges yahan mehfooz hain!</p>
+      
+      <div class="achievements-list-grid" id="achievements-list-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="modal-action" style="margin-top: 20px;">
+        <button id="btn-close-achievements" class="giant-bahana-btn modal-close-btn">
+          <span>Close Badges 🎖️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🕵️ SECRET BAHANA LAB MODAL -->
+  <div class="modal-backdrop" id="secret-lab-modal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card secret-lab-card">
+      <div class="secret-lab-glow-badge">🧪 TOP SECRET CLEARANCE LEVEL 5</div>
+      <h3 class="secret-lab-title">SECRET BAHANA LAB 🤫</h3>
+      <p class="secret-lab-sub">You solved the mystery and infiltrated the classified excuse research facility!</p>
+      
+      <div class="secret-lab-content">
+        <span class="quantum-pill">🌌 QUANTUM PARADOX BAHANA</span>
+        <p class="secret-lab-quote" id="secret-lab-quote">
+          "Sir, kal subah load-shedding ki wajah se mera time-portal invert ho gaya tha, main kal shaam se pehle login nahi kar sakta."
+        </p>
+        <div class="secret-lab-status">
+          <span>🧠 Absurdity: 1000%</span>
+          <span>🛸 Reality Distortion: MAXIMUM</span>
+        </div>
+      </div>
+
+      <div class="secret-lab-actions">
+        <button id="btn-roll-secret-bahana" class="giant-bahana-btn secret-lab-btn">
+          <span>Next Classified Excuse 🛸</span>
+        </button>
+        <button id="btn-close-secret-lab" class="secondary-btn light-text">
+          <span>Wapas Surface Pe Jao ☀️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📸 SHAREABLE DISASTER RESULT POSTER MODAL -->
+  <div class="modal-backdrop" id="share-card-modal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card share-poster-modal-card">
+      <div class="share-card-poster" id="share-card-poster">
+        <div class="poster-header">
+          <span class="poster-logo">😂 BAHANA GENERATOR v2.0</span>
+          <span class="poster-stamp">MOHALLA CERTIFIED</span>
+        </div>
+        <div class="poster-label">"YOUR OFFICIAL EXCUSE"</div>
+        <div class="poster-quote-box">
+          <p class="poster-quote" id="poster-quote-text">"Bhai, assignment complete tha, lekin laptop ne aaj emotional leave le li."</p>
+        </div>
+        <div class="poster-metrics">
+          <div class="poster-metric">
+            <span class="pm-title">Absurdity</span>
+            <span class="pm-val" id="poster-absurdity">94%</span>
+          </div>
+          <div class="poster-metric">
+            <span class="pm-title">Suspicion</span>
+            <span class="pm-val" id="poster-suspicion">87%</span>
+          </div>
+        </div>
+        <div class="poster-footer">
+          <span>Verified by Billo the Cat 🐱 • BahanaLab.com</span>
+        </div>
+      </div>
+
+      <div class="poster-action-buttons">
+        <button id="btn-share-poster-native" class="giant-bahana-btn share-poster-btn">
+          <span>SHARE THIS DISASTER 😂</span>
+        </button>
+        <button id="btn-copy-poster-text" class="action-btn copy-btn">
+          <span>📋 Copy Text</span>
+        </button>
+        <button id="btn-close-share-poster" class="action-btn worse-btn">
+          <span>Close ❌</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏆 ACHIEVEMENT UNLOCK TOAST BANNER -->
+  <div class="achievement-toast-banner" id="achievement-toast-banner">
+    <div class="at-icon">🏆</div>
+    <div class="at-info">
+      <span class="at-subtitle">ACHIEVEMENT UNLOCKED!</span>
+      <h4 class="at-title" id="at-banner-title">Professional Liar</h4>
+      <p class="at-desc" id="at-banner-desc">You have generated 10 excuses!</p>
+    </div>
   </div>
 
   <script src="script.js"></script>

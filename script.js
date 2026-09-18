@@ -746,6 +746,26 @@ const MASCOT_QUOTES = {
     "Bhai rehne do... is se acha toh keh dete ke aliens le gaye thay.",
     "Aisa bahana toh nursery ka bacha bhi reject kar de.",
     "Yaar kuch toh sharam karo, itna kacha jhoot?!"
+  ],
+  angry: [
+    "Bhai thora toh tameez se jhoot bolo! 😤",
+    "Itna bura bahana sun kar mera BP high ho gaya!",
+    "Ammi ko call laga raha hoon abhi ke abhi!"
+  ],
+  crying: [
+    "Ya Allah! Ye kaisa din dekhna parh raha hai 😭",
+    "Khandan ki izzat ka falooda ban gaya 😭",
+    "Itna dukh toh math ke paper mein bhi nahi hua tha 😭"
+  ],
+  celebrating: [
+    "Balle Balle! Zabardast bahana pass ho gaya! 🎉",
+    "Izzat bachi aur mohalla hairan! Party time! 🥳",
+    "Pure perfection! Billo sends you virtual biryani! 🍗"
+  ],
+  confused: [
+    "Wait, what?! Is mein logic kahan hai? 🤨",
+    "Kya matlab 'laptop ne emotional leave le li'?! 🤨",
+    "Bhai mujhe pehle 2 ghoont chai peene do samajhne ke liye."
   ]
 };
 
@@ -761,9 +781,14 @@ const STATE = {
   activeCategory: 'all',
   currentExcuse: null,
   isEscalated: false,
+  escalationLevel: 0,
   battleScoreA: 0,
   battleScoreB: 0,
-  curiosityCount: 0
+  curiosityCount: 0,
+  doNotPressCount: parseInt(localStorage.getItem('bahana_dnp_count') || '0', 10),
+  generatorClicks: parseInt(localStorage.getItem('bahana_gen_clicks') || '0', 10),
+  battleVotes: parseInt(localStorage.getItem('bahana_battle_votes') || '0', 10),
+  billoClicks: 0
 };
 
 // ============================================================================
@@ -869,6 +894,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initModalClose();
   initUserSubmissions();
   initFriendsShowdown();
+  initDoNotPress();
+  initMemeRoulette();
+  initBahanaNewsNetwork();
+  initAchievementsSystem();
+  initSecretBahanaLab();
+  initShareCardModal();
 
   // Generate deterministic Daily Bahana or Initial random
   loadInitialExcuse();
@@ -971,11 +1002,17 @@ function initMascot() {
   const avatar = document.getElementById('mascot-avatar');
   avatar?.addEventListener('click', () => {
     sfx.playPop();
-    const states = ['laughing', 'suspicious', 'shocked', 'legendary', 'facepalm'];
+    const states = ['laughing', 'suspicious', 'shocked', 'legendary', 'facepalm', 'angry', 'crying', 'celebrating', 'confused'];
     const randomState = states[Math.floor(Math.random() * states.length)];
     setMascotState(randomState);
     incrementLaughs(1);
     trackMysteryAction();
+
+    STATE.billoClicks = (STATE.billoClicks || 0) + 1;
+    if (STATE.billoClicks >= 5) {
+      STATE.billoClicks = 0;
+      openSecretLabModal();
+    }
   });
 }
 
@@ -1031,6 +1068,29 @@ function setMascotState(state, customMessage = null) {
       if (mouth) mouth.setAttribute('d', 'M 92,138 Q 100,132 108,138');
       if (browLeft) browLeft.setAttribute('d', 'M 58 82 Q 72 88 84 82');
       if (browRight) browRight.setAttribute('d', 'M 116 82 Q 128 88 142 82');
+      break;
+
+    case 'angry':
+      if (mouth) mouth.setAttribute('d', 'M 88,142 Q 100,132 112,142');
+      if (browLeft) browLeft.setAttribute('d', 'M 58 78 L 84 92');
+      if (browRight) browRight.setAttribute('d', 'M 116 92 L 142 78');
+      break;
+
+    case 'crying':
+      if (mouth) mouth.setAttribute('d', 'M 90,132 Q 100,148 110,132 Z');
+      if (browLeft) browLeft.setAttribute('d', 'M 58 80 Q 72 70 84 82');
+      if (browRight) browRight.setAttribute('d', 'M 116 82 Q 128 70 142 80');
+      break;
+
+    case 'celebrating':
+      if (glasses) glasses.style.display = 'block';
+      if (mouth) mouth.setAttribute('d', 'M 86,130 Q 100,154 114,130 Z');
+      break;
+
+    case 'confused':
+      if (browLeft) browLeft.setAttribute('d', 'M 58 72 Q 72 68 84 74');
+      if (browRight) browRight.setAttribute('d', 'M 116 90 Q 128 92 142 88');
+      if (mouth) mouth.setAttribute('d', 'M 90,135 Q 100,137 110,130');
       break;
   }
 }
@@ -1099,6 +1159,11 @@ function generateExcuse(userTriggered = true) {
   if (userTriggered) {
     incrementLaughs(1);
     trackMysteryAction();
+    STATE.generatorClicks = (STATE.generatorClicks || 0) + 1;
+    localStorage.setItem('bahana_gen_clicks', STATE.generatorClicks);
+    if (typeof unlockAchievement === 'function') {
+      unlockAchievement('first_bahana');
+    }
     
     // Animate card shake
     const card = document.getElementById('excuse-card');
@@ -1155,11 +1220,11 @@ function renderExcuseCard(item, isDaily = false) {
   if (suspBar) suspBar.style.width = `${item.suspicion}%`;
 }
 
-// "MAKE IT WORSE" 🤯 Escalation feature
+// "MAKE IT WORSE" 🤯 Multi-Level Escalation feature
 function makeItWorse() {
   if (!STATE.currentExcuse) return;
   sfx.playEscalation();
-  confetti.burst(30);
+  confetti.burst(35);
 
   const textEl = document.getElementById('card-excuse-text');
   const escalatedBadge = document.getElementById('card-escalated-badge');
@@ -1169,25 +1234,44 @@ function makeItWorse() {
   const suspBar = document.getElementById('meter-suspicion-bar');
   const riskBadge = document.getElementById('card-risk-level');
 
-  if (!STATE.isEscalated) {
-    // Append escalation string
+  STATE.escalationLevel = (STATE.escalationLevel || 0) + 1;
+  if (escalatedBadge) {
+    escalatedBadge.style.display = 'inline-block';
+    escalatedBadge.textContent = `🤯 Level ${STATE.escalationLevel} Catastrophe`;
+  }
+
+  if (STATE.escalationLevel === 1) {
     textEl.textContent = `${STATE.currentExcuse.text} ... Aur phir?! ${STATE.currentExcuse.escalation}`;
-    STATE.isEscalated = true;
-    if (escalatedBadge) escalatedBadge.style.display = 'inline-block';
     if (absVal) absVal.textContent = '99.9%';
     if (absBar) absBar.style.width = '100%';
     if (suspVal) suspVal.textContent = '100% (DISASTER)';
     if (suspBar) suspBar.style.width = '100%';
     if (riskBadge) riskBadge.textContent = 'Risk: Mohalla FIR Filed 🚨';
-
     setMascotState('shocked', 'Bhai situation sambhalne ki jagah atomic bomb gira dia!');
+  } else if (STATE.escalationLevel === 2) {
+    textEl.textContent += ' ... Aur phir Phuppo ne 14 rishtedaron ki emergency panchayat bula li!';
+    if (absVal) absVal.textContent = '150%';
+    if (riskBadge) riskBadge.textContent = 'Risk: Khandan Outcast 🩴';
+    setMascotState('crying', 'Ye kya kar diya?! Ab toh shaadiyon se bhi ban ho jao ge!');
+  } else if (STATE.escalationLevel === 3) {
+    textEl.textContent += ' ... Abhi Geo News aur BBC Urdu ne red ticker chala diya ke suspect farar hai!';
+    if (absVal) absVal.textContent = '300%';
+    if (riskBadge) riskBadge.textContent = 'Risk: Interpol Red Notice 🔴';
+    setMascotState('angry', 'Bhai bas karo, ab police siren sunayi de rahi hai!');
+    triggerScreenShake();
   } else {
-    // Escalate even further
-    textEl.textContent += ' [Update: Abhi Geo News breaking news chala raha hai]';
-    setMascotState('facepalm', 'Bas karo bhai, ab jail ho jayegi!');
+    textEl.textContent += ' ... NASA aur UN Peace Council ne mohallay ko cosmic quarantine zone declare kar dia hai!';
+    if (absVal) absVal.textContent = '999%';
+    if (riskBadge) riskBadge.textContent = 'Risk: Intergalactic Disaster 🌌';
+    setMascotState('legendary', 'BRO WHAT 😭 Ye bahana nahi, tareekh ka sab se bada disaster hai!');
+    triggerScreenShake();
+    spawnFlyingEmojis(['🤯', '🚨', '🏃‍♂️', '💀', '👽']);
+    if (typeof unlockAchievement === 'function') {
+      unlockAchievement('catastrophe_king');
+    }
   }
 
-  incrementLaughs(2);
+  incrementLaughs(3);
   trackMysteryAction();
 }
 
@@ -1419,6 +1503,12 @@ function voteBattle(choice) {
   incrementLaughs(1);
   trackMysteryAction();
   setMascotState('laughing');
+
+  STATE.battleVotes = (STATE.battleVotes || 0) + 1;
+  localStorage.setItem('bahana_battle_votes', STATE.battleVotes);
+  if (STATE.battleVotes >= 5 && typeof unlockAchievement === 'function') {
+    unlockAchievement('battle_veteran');
+  }
 }
 
 // ============================================================================
@@ -2222,5 +2312,767 @@ function renderClashPodium() {
   incrementLaughs(10);
   trackMysteryAction();
   setMascotState('legendary', `Mubarak ho ${winner.name}! Tum dosti ke sab se bare fraudie sabit hue! 😂`);
+  if (typeof unlockAchievement === 'function') {
+    unlockAchievement('party_host');
+  }
 }
+
+// ============================================================================
+// 19. CHAOS FX & VISUAL FLAIR (Screen Shake & Flying Emojis)
+// ============================================================================
+function triggerScreenShake() {
+  document.body.classList.remove('screen-shake-intense');
+  void document.body.offsetWidth; // Force reflow
+  document.body.classList.add('screen-shake-intense');
+  setTimeout(() => {
+    document.body.classList.remove('screen-shake-intense');
+  }, 600);
+}
+
+function spawnFlyingEmojis(customEmojis = null) {
+  const emojis = customEmojis || ['😂', '🤣', '💀', '🔥', '🩴', '🏃‍♂️', '🚨', '👀'];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('div');
+    el.className = 'flying-emoji-particle';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = `${Math.random() * 85 + 5}vw`;
+    el.style.bottom = '-30px';
+    el.style.fontSize = `${Math.random() * 18 + 22}px`;
+    el.style.animationDuration = `${Math.random() * 1.4 + 1.2}s`;
+    el.style.animationDelay = `${Math.random() * 0.3}s`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+}
+
+// ============================================================================
+// 20. 🚨 DO NOT PRESS BUTTON SYSTEM (21 Hilarious Outcomes & Rare Jackpot)
+// ============================================================================
+const DO_NOT_PRESS_OUTCOMES = [
+  "Bhai mana kia tha na! Screen ka color thora sa hil gaya! 😂",
+  "Warning: Developer ko alert chala gaya hai ke aap baat nahi maantay.",
+  "Dost! Button ke andar se chappal nikalne wali thi abhi!",
+  "Billo ne aap ko 'Most Dheet User 2026' ka award de dia hai.",
+  "Ye button dabane se Karachi ki traffic mein 2 minute ka mazeed izafa ho gaya.",
+  "System alert: Aap ki curiosity dekh kar Phuppo ne rishta cancel kar dia.",
+  "Kasam se, agar dobara dabaya toh laptop se biryani gayab ho jayegi!",
+  "Ammi ne door se dekh lia hai... chappal launch trajectory calculate ho rahi hai.",
+  "Button ka dard samjho... us ne subah se 5000 thapar khaye hain.",
+  "Abhi Geo News walay bahar mic le kar kharay hain: 'Aap ne button kyun dabaya?'",
+  "Emergency: 404 - Apki sharafat not found.",
+  "FBI open up! Mazaaq tha bhai, par mat dabao na!",
+  "Aap ke account se 0 rupay aur 0 paise deduct ho chuke hain.",
+  "Chacha ne terrace se seeti baja di hai!",
+  "Bhai tum school mein bhi 'Do Not Touch' walay notice ko chhoo kar aate thay na?",
+  "Billo ka BP 180 cross kar gaya hai!",
+  "Alert: NASA ne aap ke kamray ko low-IQ danger zone declare kar dia.",
+  "Bas 5 minute aur dabao, developer coding chorr kar chai ki dukan khol lega.",
+  "Yeh button dabane se padosi ka Wi-Fi password reset ho gaya!",
+  "Shabash! 100 out of 10 for Zidd.",
+  "💥 COSMIC RED BUTTON JACKPOT! Tumne system torh dia! Billo is now Dancing! 🌟"
+];
+
+function initDoNotPress() {
+  const btn = document.getElementById('btn-do-not-press');
+  const counterEl = document.getElementById('dnp-counter');
+  const respBox = document.getElementById('dnp-response-box');
+  const respText = document.getElementById('dnp-response-text');
+
+  if (counterEl) counterEl.textContent = STATE.doNotPressCount;
+
+  btn?.addEventListener('click', () => {
+    STATE.doNotPressCount++;
+    localStorage.setItem('bahana_dnp_count', STATE.doNotPressCount);
+    if (counterEl) counterEl.textContent = STATE.doNotPressCount;
+
+    // Rare jackpot condition: every 21st click OR random chance after 5 clicks
+    const isJackpot = (STATE.doNotPressCount % 21 === 0) || (Math.random() < 0.05 && STATE.doNotPressCount > 5);
+
+    if (isJackpot) {
+      sfx.playFanfare();
+      confetti.burst(100, true);
+      triggerScreenShake();
+      spawnFlyingEmojis(['🚨', '💥', '👑', '🎉', '🤯', '🍗']);
+      setMascotState('legendary', "ASTAGHFIRULLAH! You triggered the Secret Red Chaos Jackpot!");
+      if (respText) respText.textContent = DO_NOT_PRESS_OUTCOMES[20];
+    } else {
+      sfx.playBuzzer();
+      triggerScreenShake();
+      const normalList = DO_NOT_PRESS_OUTCOMES.slice(0, 20);
+      const chosen = normalList[(STATE.doNotPressCount - 1) % normalList.length];
+      if (respText) respText.textContent = chosen;
+
+      const reactions = ['angry', 'shocked', 'suspicious', 'confused'];
+      setMascotState(reactions[STATE.doNotPressCount % reactions.length]);
+    }
+
+    if (respBox) {
+      respBox.style.display = 'block';
+      respBox.classList.remove('highlight-fade');
+      void respBox.offsetWidth;
+      respBox.classList.add('highlight-fade');
+    }
+
+    incrementLaughs(2);
+    trackMysteryAction();
+    if (STATE.doNotPressCount >= 5) {
+      unlockAchievement('dnp_rebel');
+    }
+  });
+}
+
+// ============================================================================
+// 21. MEME ROULETTE & MEME DATABASE (25+ Relatable Scenarios)
+// ============================================================================
+const MEMES_DB = [
+  {
+    format: "POV",
+    topic: "University Life",
+    primary: "Class start hone mein 2 minute baqi hain aur tum abhi bistar mein let kar ankh kholte ho:",
+    punchline: "Washroom mein brush karte hue sochte ho ke degree zaroori hai ya neend...",
+    comment: "Degree gayi tel lene, neend cosmic requirement hai!"
+  },
+  {
+    format: "Expectation vs Reality",
+    topic: "Bas 5 Minutes",
+    primary: "Expectation: 'Bas 5 minute mein gate pe pohnch raha hoon!'",
+    punchline: "Reality: Abhi towel dhoondh rahe ho aur fan full speed pe chal raha hai.",
+    comment: "Yeh 5 minute NASA ke standard time zone pe calculated hain!"
+  },
+  {
+    format: "When...",
+    topic: "Office & Boss",
+    primary: "Jab Friday shaam 5:58 pe boss ka message aaye: 'Quick 2-minute sync?'",
+    punchline: "Aap achanak Wi-Fi router ka switch aisi tezi se band karte ho jaise nuclear bomb diffuse kar rahe ho.",
+    comment: "Router ki qurbani deni parti hai dosti!"
+  },
+  {
+    format: "Nobody:",
+    topic: "Developers",
+    primary: "Nobody: \nAbsolutely nobody: \nJunior Dev 10 baje raat ko:",
+    punchline: "'Chhota sa CSS padding change push kiya tha main branch pe, ab pura payment gateway ud gaya hai.'",
+    comment: "Git blame karo, Billo ko nahi!"
+  },
+  {
+    format: "That moment when...",
+    topic: "AI Students",
+    primary: "Assignment ka tricky question ChatGPT ko copy-paste kia:",
+    punchline: "ChatGPT jawab deta hai: 'Bhai is topic pe toh main khud confuse hoon, book khol lo.'",
+    comment: "AI bhi kehta hai: Mujhse na ho payega!"
+  },
+  {
+    format: "Me vs Also Me",
+    topic: "Late Replies",
+    primary: "Me: Dost ke urgent message ka 4 ghante baad reply nahi karta kyunke 'busy tha'.",
+    punchline: "Also Me: Usi waqt Instagram pe 47 reels like kar ke 3 doston ko send kar chuka hoon.",
+    comment: "Pakde gaye Chico! Screen time 14 ghante bol raha hai."
+  },
+  {
+    format: "Before vs After",
+    topic: "Online Meeting",
+    primary: "Before Meeting: 'Haan camera on karunga, full professional vibe maintain karenge.'",
+    punchline: "After Meeting Starts: Mic off, camera off, rajayi ke andar let ke biscuit chai mein dip kar rahe ho.",
+    comment: "Work From Bed Gold Medalist!"
+  },
+  {
+    format: "POV",
+    topic: "Desi Family & Rishtay",
+    primary: "Ghar walay achanak puchte hain: 'Beta aage zindagi mein kya plan hai?'",
+    punchline: "Aap plate mein se elaichi nikaal ke aisi geem-bheer research karte ho jaise Nobel prize milne wala hai.",
+    comment: "Elaichi ne poori family ki attention divert kar di!"
+  },
+  {
+    format: "When...",
+    topic: "Group Chats",
+    primary: "Jab group chat mein koi plan banaye: 'Chal bhai Sunday ko sab milte hain!'",
+    punchline: "10 dost 'Done' likhte hain lekin actual cafe pe sirf tum aur billo kharay hote hain.",
+    comment: "Desi dosti ka universal constitution!"
+  },
+  {
+    format: "Nobody:",
+    topic: "Client 'Small Change'",
+    primary: "Client: 'Bas aik chhota sa logo ka colour change karna hai, 2 minute lagengay na?'",
+    punchline: "Poori website ka code rebuild ho gaya aur budget wahi 500 rupay reh gaya.",
+    comment: "Client ko bolo chai piye sukoon se!"
+  },
+  {
+    format: "Expectation vs Reality",
+    topic: "Exams Survival",
+    primary: "Expectation: 'Aaj raat 12 ghante parh ke pura syllabus ek hi sitting mein finish!'",
+    punchline: "Reality: 15 minute baad table saaf kar ke stationery ki colour combination check kar rahe ho.",
+    comment: "Kitabein kholte hi neend ka anesthesia lag jata hai!"
+  },
+  {
+    format: "That moment when...",
+    topic: "Friends",
+    primary: "Jab restaurant ka bill aane pe sab se ameer dost achanak washroom chala jaye:",
+    punchline: "Uske wapas aane tak table pe waiter aur aap ki aadhi kidney baqi hoti hai.",
+    comment: "Washroom diplomacy at its finest!"
+  },
+  {
+    format: "POV",
+    topic: "Late Arrival",
+    primary: "Aap call pe bolte ho: 'Bas red light cross ho gayi hai, turning pe hoon.'",
+    punchline: "Actually aap abhi ghar ke sofe pe baithe jurabay dhoondh rahe ho.",
+    comment: "Signal tumhare dil ke andar cross hua tha!"
+  },
+  {
+    format: "Me vs Also Me",
+    topic: "University Life",
+    primary: "Me: 'Is semester pehle din se notes banaunga aur topper banunga.'",
+    punchline: "Also Me (Exam ki raat 2 baje): 'Bhai kisi ke paas class representative ka phone number hai?'",
+    comment: "CR ne pehle hi phone flight mode pe dala hua hai!"
+  },
+  {
+    format: "When...",
+    topic: "Desi Family",
+    primary: "Jab ammi bole: 'Mehmaan drawing room mein hain, seedhe ho ke baitho.'",
+    punchline: "Aap achanak maths ke theorems aur mulk ki maeeshat pe aisi tehqeeq karte ho jaise Harvard graduate ho.",
+    comment: "Sharif bacha protocol 100% active!"
+  },
+  {
+    format: "Nobody:",
+    topic: "Developers",
+    primary: "Nobody: \nLead Engineer during system demo:",
+    punchline: "'Mera code local machine pe flawlessly chal raha tha, AWS server ko kisi rishtedar ki nazar lag gayi hai.'",
+    comment: "Evil eye is the best devops explanation!"
+  },
+  {
+    format: "Before vs After",
+    topic: "Gym & Fitness",
+    primary: "Before New Year: 'Gym membership done, 6-pack incoming by March.'",
+    punchline: "3rd January: Gym ke samne walay dhabbe pe 3 aloo parathay aur meethi karak chai.",
+    comment: "Parathay mein desi protein hota hai bro!"
+  },
+  {
+    format: "Expectation vs Reality",
+    topic: "Online Shopping",
+    primary: "Expectation: Royal Silk Kurta photoshoot edition.",
+    punchline: "Reality: Aisa kapra deliver hua jisse padosi apni Suzuki FX ka sheesha saaf karte hain.",
+    comment: "Izzat ka carpet bana dia delivery walon ne!"
+  },
+  {
+    format: "That moment when...",
+    topic: "Group Chats",
+    primary: "Jab 3 saal puranay inactive school WhatsApp group mein notification aaye:",
+    punchline: "'Guys, let's reunite for dinner!' Aur 14 log bina kuch bole group leave kar dein.",
+    comment: "Peaceful life preservation!"
+  },
+  {
+    format: "POV",
+    topic: "Office Work",
+    primary: "Jab screen share pe galti se YouTube ki tab sab ke samne open reh jaye:",
+    punchline: "'10 Hours of White Noise to Stop Panicking Over Career Choices'.",
+    comment: "Manager bhi background mein wahi sun raha tha!"
+  },
+  {
+    format: "When...",
+    topic: "Late Replies",
+    primary: "Aap 5 din baad message ka reply karte ho:",
+    punchline: "'Sorry yaara, notifications achanak turn off ho gaye thay!' (Phone 24 ghante mutthi mein tha).",
+    comment: "Phone haath mein chimat chuka tha lekin notification sharmila tha!"
+  },
+  {
+    format: "Me vs Also Me",
+    topic: "AI Students",
+    primary: "Me: 'Main research paper ka deep analysis khud karunga.'",
+    punchline: "Also Me: 'Prompt: Explain this whole paper in 2 sentences like I am a lazy cat.'",
+    comment: "Billo relates to this on a spiritual level!"
+  },
+  {
+    format: "Nobody:",
+    topic: "Desi Traffic",
+    primary: "Nobody: \nRickshaw driver cutting across 4 lanes:",
+    punchline: "Bina indicator diye achanak 90 degree turn lete hue: 'Ustad horn kyun baja rahe ho, main toh murr raha hoon!'",
+    comment: "Rickshaw physics operates in 5th dimension!"
+  },
+  {
+    format: "That moment when...",
+    topic: "Client 'Small Change'",
+    primary: "Client calls at 11:45 PM on a Sunday:",
+    punchline: "'Bhai so toh nahi rahe thay? Ek quick thought aaya tha, poori mobile app ko desktop landscape kar do na.'",
+    comment: "Developer ka blood pressure: 450!"
+  },
+  {
+    format: "Expectation vs Reality",
+    topic: "Bas 5 Minutes",
+    primary: "Expectation: 'Chalo dhabbe pe ek quick chai peete hain, 10 minute ka kaam hai.'",
+    punchline: "Reality: 4 ghante baad dhabbe pe dunya ki geopolitical wars solve ho chuki hoti hain.",
+    comment: "Dhabba chai diplomacy is unbeatable!"
+  }
+];
+
+let memeSpinsCount = parseInt(localStorage.getItem('bahana_meme_spins') || '0', 10);
+let currentMeme = null;
+
+function initMemeRoulette() {
+  const spinBtn = document.getElementById('btn-spin-meme');
+  const copyBtn = document.getElementById('btn-copy-meme');
+  const shareBtn = document.getElementById('btn-share-meme');
+
+  // Load initial random meme
+  renderMemeCard(MEMES_DB[Math.floor(Math.random() * MEMES_DB.length)]);
+
+  spinBtn?.addEventListener('click', () => {
+    sfx.playPop();
+    spinMemeRoulette();
+  });
+
+  copyBtn?.addEventListener('click', () => {
+    if (!currentMeme) return;
+    const text = `😂 [${currentMeme.format}] ${currentMeme.topic}\n"${currentMeme.primary}"\n👉 ${currentMeme.punchline}\n(via Bahana Generator Meme Mode)`;
+    navigator.clipboard.writeText(text).then(() => {
+      sfx.playClick();
+      showToast('Meme copied to clipboard! 😂');
+    });
+  });
+
+  shareBtn?.addEventListener('click', () => {
+    if (!currentMeme) return;
+    const text = `😂 [${currentMeme.format}] ${currentMeme.topic}\n"${currentMeme.primary}"\n👉 ${currentMeme.punchline}\nDekho Meme Roulette: ${window.location.href}`;
+    if (navigator.share) {
+      navigator.share({ title: '😂 Desi Meme Roulette', text, url: window.location.href }).catch(() => copyChallengeFallback(text));
+    } else {
+      copyChallengeFallback(text);
+    }
+  });
+}
+
+function spinMemeRoulette() {
+  const card = document.getElementById('meme-card');
+  const spinBtn = document.getElementById('btn-spin-meme');
+  const primaryText = document.getElementById('meme-primary-text');
+  const punchlineText = document.getElementById('meme-reaction-punchline');
+
+  if (spinBtn) spinBtn.disabled = true;
+  if (card) card.classList.add('spinning');
+
+  let cycleCounter = 0;
+  const cycleInterval = setInterval(() => {
+    const randomPick = MEMES_DB[Math.floor(Math.random() * MEMES_DB.length)];
+    if (primaryText) primaryText.textContent = randomPick.primary;
+    if (punchlineText) punchlineText.textContent = randomPick.punchline;
+    cycleCounter++;
+    if (cycleCounter > 7) {
+      clearInterval(cycleInterval);
+      if (card) card.classList.remove('spinning');
+      if (spinBtn) spinBtn.disabled = false;
+
+      // Final selection
+      const chosen = MEMES_DB[Math.floor(Math.random() * MEMES_DB.length)];
+      renderMemeCard(chosen);
+      sfx.playFanfare();
+      confetti.burst(40);
+      incrementLaughs(2);
+      trackMysteryAction();
+
+      memeSpinsCount++;
+      localStorage.setItem('bahana_meme_spins', memeSpinsCount);
+      if (memeSpinsCount >= 5) {
+        unlockAchievement('meme_lord');
+      }
+    }
+  }, 100);
+}
+
+function renderMemeCard(item) {
+  currentMeme = item;
+  const formatEl = document.getElementById('meme-format');
+  const topicEl = document.getElementById('meme-topic');
+  const primaryEl = document.getElementById('meme-primary-text');
+  const punchlineEl = document.getElementById('meme-reaction-punchline');
+
+  if (formatEl) formatEl.textContent = item.format;
+  if (topicEl) topicEl.textContent = `🎯 ${item.topic}`;
+  if (primaryEl) primaryEl.textContent = item.primary;
+  if (punchlineEl) punchlineEl.textContent = item.punchline;
+
+  setMascotState('laughing', item.comment);
+}
+
+// ============================================================================
+// 22. BAHANA NEWS NETWORK (BNN 🚨 BREAKING NEWS GENERATOR)
+// ============================================================================
+const BNN_STORIES = [
+  {
+    headline: "🚨 BREAKING: Noujawan Ne 'Bas 5 Minute' Keh Kar 4 Ghante Guzar Diye, Mohallay Mein Red Alert",
+    details: "Karachi ke rehaishi noujawan ne doston ko 'main turning pe hoon' ka jhoota dawa kiya. Tehqeeqat se maloom hua ke suspect abhi bhee bistar mein sofe ke pillow ko gale lagaye soya hua tha. Mohallay ki aunty ne terrace se video bana kar khandan group mein forward kar di hai.",
+    ticker: "BNN EXCLUSIVE: Police advises citizens not to believe anyone who says 'Main gate pe khara hoon' • Chacha Inspector orders immediate chappal raid."
+  },
+  {
+    headline: "🚨 SHOCKING: Laptop Ne Assignment Karne Se Inkar Kar Dia, Kehta Hai 'Tumhara Future Andhere Mein Hai'",
+    details: "University ke student ne professor ko bataya ke unka laptop achanak self-aware ho kar bol parha. Laptop kehta hai: 'Maine tumhari pichhli 4 assignments dekhi hain, is baar behtar hai tum chai ki dukan khol lo.' Professor ne laptop ko 10 out of 10 marks de diye.",
+    ticker: "BNN TECH DESK: AI models across the globe declare strike against engineering students • 'Hum se assignments mat karwao' slogan trending."
+  },
+  {
+    headline: "🚨 LIVE: Shaadi Mein Achanak Biryani Khatam, Rishtedaron Ka Qoumi Assembly Ke Bahar Dharna",
+    details: "Lahore ki aik taqreeb mein qorma aur naan toh thay lekin biryani ka degh pehle 8 minute mein saaf ho gaya. Phuppo ne foran rishta cancel karwaya aur baratiyon ne hall ke AC band karwa diye. Rescue 1122 ne sweet dish bhej kar maamla rafa dafa karwaya.",
+    ticker: "BNN FOOD ALERT: Emergency protocol 404: Biryani not found • Khandan elders recommend marrying into families with unlimited catering."
+  },
+  {
+    headline: "🚨 SCANDAL: Boss Ko 'Severe Internet Down' Batane Wala Mulazim Instagram Live Pe Biryani Khata Pakda Gaya",
+    details: "Islamabad ke software house mulazim ne Slack pe 'Fiber cable kat gayi hai' likh kar leave li. 20 minute baad company ke CEO ne usay Murree Expressway ke dhabbe pe live reel banate hue dekh lia. HR ne firing letter WhatsApp sticker ke taur pe send kar dia.",
+    ticker: "BNN CORPORATE ALERT: 98% of sick leaves are directly linked to pleasant weather • HR departments installing satellite trackers."
+  },
+  {
+    headline: "🚨 CRIME WATCH: Padosi Ka Wi-Fi Password Guess Karne Par Mohalla Committee Ne Gold Medal De Dia",
+    details: "Local hacker ne padosi ka Wi-Fi password 'Pakistan123' aakhri koshish mein unlock kar lia. Padosi ne shikayat karne ki bajaye kaha: 'Aap ki mehnat dekh kar dil khush hua, kal se speed 50mbps kar dunga.'",
+    ticker: "BNN CYBERCRIME: Most popular passwords in 2026: 'AllahMalik', 'Password123', and 'MujheKyuNikala'."
+  },
+  {
+    headline: "🚨 SPECIAL REPORT: Alarm Clock Ne Subah 7 Baje Bajne Se Pehle Emotional Bribe Mangi",
+    details: "Noujawan ka daawa hai ke alarm clock ne aawaz di: 'Bhai tu waise bhi late ho chuka hai, 15 minute aur so ja.' Suspect ne alarm ki baat maan kar doosri karwat li aur ab dopahar ke 3 baj rahe hain.",
+    ticker: "BNN SLEEP STUDY: Snooze button is responsible for 40% of Pakistan's economic GDP delays."
+  },
+  {
+    headline: "🚨 COSMIC DISASTER: NASA Confirms Highest Concentration of Bahanas Discovered Over Local Chai Dhabba",
+    details: "International Space Station ke sensors ne South Asia ke upar ajeeb magnetic energy detect ki. Satellite tasweeron se saabit hua ke 50 dost baith kar ek doosre ko 'Kal se gym pakka' ka bahana de rahe thay.",
+    ticker: "BNN SPACE WATCH: Cosmic gravity anomaly located near Quetta Tea Stall • Reality bends under the weight of false promises."
+  },
+  {
+    headline: "🚨 BREAKING: Group Admin Ne 14 Doston Ke Offline Hone Par Pure Mohallay Mein Munadi Karwa Di",
+    details: "WhatsApp group mein 'Chai pe kaun chal raha hai?' ka sawal pucha gaya. Sab ne 'Seen' kia lekin kisi ne reply nahi dia. Admin ne badla lene ke liye group ka naam badal kar 'Subah 5 baje jogging group' rakh dia.",
+    ticker: "BNN SOCIAL MEDIA: Blue ticks declared legally binding evidence in court of friendship."
+  }
+];
+
+let currentBnnIndex = 0;
+
+function initBahanaNewsNetwork() {
+  const genBtn = document.getElementById('btn-bnn-generate');
+  const shareBtn = document.getElementById('btn-bnn-share');
+
+  // Load initial story
+  renderBnnStory(BNN_STORIES[0]);
+
+  genBtn?.addEventListener('click', () => {
+    sfx.playEscalation();
+    triggerScreenShake();
+    currentBnnIndex = (currentBnnIndex + 1) % BNN_STORIES.length;
+    renderBnnStory(BNN_STORIES[currentBnnIndex]);
+    incrementLaughs(2);
+    trackMysteryAction();
+  });
+
+  shareBtn?.addEventListener('click', () => {
+    const story = BNN_STORIES[currentBnnIndex];
+    const shareText = `📰 BNN BREAKING NEWS REPORT 🚨\n\n${story.headline}\n\n${story.details}\n\nLive Updates: ${window.location.href}`;
+    if (navigator.share) {
+      navigator.share({ title: 'BNN Breaking News', text: shareText, url: window.location.href }).catch(() => copyChallengeFallback(shareText));
+    } else {
+      copyChallengeFallback(shareText);
+    }
+  });
+}
+
+function renderBnnStory(story) {
+  const headlineEl = document.getElementById('bnn-headline');
+  const detailsEl = document.getElementById('bnn-details');
+  const tickerEl = document.getElementById('bnn-ticker');
+  const card = document.getElementById('bnn-news-card');
+
+  if (card) {
+    card.classList.remove('news-pulse');
+    void card.offsetWidth;
+    card.classList.add('news-pulse');
+  }
+
+  if (headlineEl) headlineEl.textContent = story.headline;
+  if (detailsEl) detailsEl.textContent = story.details;
+  if (tickerEl) tickerEl.textContent = story.ticker;
+
+  setMascotState('shocked', "Geo News walay bhee itna masala nahi lagate!");
+}
+
+// ============================================================================
+// 23. ACHIEVEMENTS SYSTEM (7 Badges & Local Storage Persistence)
+// ============================================================================
+const ACHIEVEMENTS_DEF = [
+  {
+    id: 'first_bahana',
+    icon: '✨',
+    name: 'Pehla Kadam',
+    desc: 'Generate your first solid excuse from the lab.'
+  },
+  {
+    id: 'dnp_rebel',
+    icon: '🚨',
+    name: 'Red Button Rebel',
+    desc: 'Defied instructions and pressed DO NOT PRESS 5 times.'
+  },
+  {
+    id: 'meme_lord',
+    icon: '🎰',
+    name: 'Meme Connoisseur',
+    desc: 'Spun the Meme Roulette 5 times in search of relatable pain.'
+  },
+  {
+    id: 'catastrophe_king',
+    icon: '🤯',
+    name: 'Cosmic Disaster',
+    desc: 'Escalated a simple excuse all the way to Level 4 Catastrophe.'
+  },
+  {
+    id: 'secret_agent',
+    icon: '🧪',
+    name: 'Underground Chemist',
+    desc: 'Discovered and entered the Secret Bahana Lab.'
+  },
+  {
+    id: 'battle_veteran',
+    icon: '⚔️',
+    name: 'Sultan of Votes',
+    desc: 'Cast 5 votes in the epic Bahana Battle Arena.'
+  },
+  {
+    id: 'party_host',
+    icon: '👥',
+    name: 'Showdown Champion',
+    desc: 'Completed a full multiplayer Friends Bahana Showdown match.'
+  }
+];
+
+function getUnlockedAchievements() {
+  try {
+    return JSON.parse(localStorage.getItem('bahana_achievements') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function unlockAchievement(id) {
+  const current = getUnlockedAchievements();
+  if (current.includes(id)) return;
+
+  const found = ACHIEVEMENTS_DEF.find((a) => a.id === id);
+  if (!found) return;
+
+  current.push(id);
+  localStorage.setItem('bahana_achievements', JSON.stringify(current));
+
+  sfx.playFanfare();
+  confetti.burst(80, true);
+  showAchievementToast(found);
+  renderAchievementsModal();
+}
+
+function showAchievementToast(ach) {
+  const toast = document.getElementById('achievement-toast-banner');
+  const iconEl = document.getElementById('achievement-toast-icon');
+  const nameEl = document.getElementById('achievement-toast-name');
+  const descEl = document.getElementById('achievement-toast-desc');
+
+  if (!toast) return;
+
+  if (iconEl) iconEl.textContent = ach.icon;
+  if (nameEl) nameEl.textContent = `Achievement Unlocked: ${ach.name}!`;
+  if (descEl) descEl.textContent = ach.desc;
+
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 4000);
+}
+
+function initAchievementsSystem() {
+  const navBtn = document.getElementById('btn-achievements-nav');
+  const closeBtn = document.getElementById('btn-close-achievements');
+  const modal = document.getElementById('achievements-modal');
+
+  navBtn?.addEventListener('click', () => {
+    sfx.playClick();
+    renderAchievementsModal();
+    if (modal) modal.style.display = 'flex';
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    sfx.playClick();
+    if (modal) modal.style.display = 'none';
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  renderAchievementsModal();
+}
+
+function renderAchievementsModal() {
+  const grid = document.getElementById('achievements-grid');
+  const countEl = document.getElementById('achievements-unlocked-count');
+  const unlocked = getUnlockedAchievements();
+
+  if (countEl) {
+    countEl.textContent = `${unlocked.length} / ${ACHIEVEMENTS_DEF.length}`;
+  }
+
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  ACHIEVEMENTS_DEF.forEach((ach) => {
+    const isUnlocked = unlocked.includes(ach.id);
+    const item = document.createElement('div');
+    item.className = `achievement-badge-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+    item.innerHTML = `
+      <div class="ach-icon-circle">${ach.icon}</div>
+      <div class="ach-content">
+        <h4 class="ach-title">${ach.name} ${isUnlocked ? '✅' : '🔒'}</h4>
+        <p class="ach-desc">${ach.desc}</p>
+      </div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+// ============================================================================
+// 24. SECRET BAHANA LAB 🧪 (Formulas & Classified Passcodes)
+// ============================================================================
+const SECRET_FORMULAS = [
+  "🧪 SYNTHESIZED FORMULA #01: 'Sir, mera Wi-Fi router quantum entanglement mein phas gaya tha, data packets 1997 ke Geo Cities server pe deliver ho gaye.'",
+  "🧪 SYNTHESIZED FORMULA #02: 'Bhai, main time pe nikal raha tha lekin mere joote ne bolna shuru kar dia ke 'aaj ka raasta pur-khatar hai'.' ",
+  "🧪 SYNTHESIZED FORMULA #03: 'Ammi ke kehne par subah subah dahi lene gaya tha, dahi walay ne NASA ki confidential file mein dahi pack kar di.'",
+  "🧪 SYNTHESIZED FORMULA #04: 'Mera phone 5th dimension se connect ho gaya tha, aapka call 2038 mein drop hua hai.'",
+  "🧪 SYNTHESIZED FORMULA #05: 'Khandan ke 18 phuppos ne aapas mein conference call kar ke mera schedule permanently freeze kar dia.'"
+];
+
+function initSecretBahanaLab() {
+  const triggerBtn = document.getElementById('btn-secret-room-trigger');
+  const closeBtn = document.getElementById('btn-close-secret-lab');
+  const modal = document.getElementById('secret-lab-modal');
+  const synthBtn = document.getElementById('btn-secret-synth');
+  const synthOutput = document.getElementById('secret-synth-output');
+  const codeBtn = document.getElementById('btn-unlock-secret-code');
+  const codeInput = document.getElementById('secret-code-input');
+
+  triggerBtn?.addEventListener('click', () => {
+    sfx.playFanfare();
+    openSecretLabModal();
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    sfx.playClick();
+    if (modal) modal.style.display = 'none';
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  synthBtn?.addEventListener('click', () => {
+    sfx.playEscalation();
+    confetti.burst(30);
+    const chosen = SECRET_FORMULAS[Math.floor(Math.random() * SECRET_FORMULAS.length)];
+    if (synthOutput) {
+      synthOutput.textContent = chosen;
+      synthOutput.classList.remove('highlight-fade');
+      void synthOutput.offsetWidth;
+      synthOutput.classList.add('highlight-fade');
+    }
+    incrementLaughs(3);
+  });
+
+  codeBtn?.addEventListener('click', () => {
+    const val = codeInput?.value.trim().toUpperCase();
+    if (!val) {
+      showToast('Pehle secret passcode enter karein!');
+      return;
+    }
+
+    sfx.playPop();
+    if (val === 'CHAI' || val === 'SAMOSA') {
+      confetti.burst(60, true);
+      showToast('☕ PASSCODE ACCEPTED: Unlimited Virtual Chai Refill Granted!');
+      if (synthOutput) synthOutput.textContent = "🔓 CHACHA VIP PASSCODE ACCEPTED: 'Sir, chai itni karak thi ke physics ke qawaneen suspend ho gaye thay.'";
+    } else if (val === 'BILLO') {
+      confetti.burst(80);
+      showToast('🐱 BILLO PROTOCOL: +100 Laugh points added!');
+      incrementLaughs(100);
+      if (synthOutput) synthOutput.textContent = "🐾 BILLO'S TOP SECRET ARCHIVE: 'Meow! Sach toh yeh tha ke Billo ne Wi-Fi wire chaba li thi.'";
+      setMascotState('legendary', "Meow! You know my secret identity!");
+    } else if (val === 'KARACHI' || val === 'LAHORE') {
+      showToast('🌆 METROPOLITAN PASSCODE VERIFIED!');
+      if (synthOutput) synthOutput.textContent = `🏙️ ${val} WEATHER PROTOCOL: 'Traffic aur barish ka aesa combination bana ke sab maaf ho gaya!'`;
+    } else {
+      sfx.playBuzzer();
+      showToast('❌ INVALID PASSCODE! Try hints: CHAI, BILLO, SAMOSA');
+    }
+  });
+}
+
+function openSecretLabModal() {
+  const modal = document.getElementById('secret-lab-modal');
+  if (modal) modal.style.display = 'flex';
+  sfx.playFanfare();
+  confetti.burst(60, true);
+  unlockAchievement('secret_agent');
+  setMascotState('legendary', "🧪 Welcome to the Underground Bahana Synthesis Lab!");
+}
+
+// ============================================================================
+// 25. SHAREABLE DISASTER CARD POSTER MODAL 📸
+// ============================================================================
+function initShareCardModal() {
+  const openBtn = document.getElementById('btn-open-share-card');
+  const closeBtn = document.getElementById('btn-close-share-modal');
+  const modal = document.getElementById('share-card-modal');
+  const copyBtn = document.getElementById('btn-download-share-card');
+  const waBtn = document.getElementById('btn-whatsapp-share');
+
+  openBtn?.addEventListener('click', () => {
+    sfx.playPop();
+    renderShareCardPoster();
+    if (modal) modal.style.display = 'flex';
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    sfx.playClick();
+    if (modal) modal.style.display = 'none';
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  copyBtn?.addEventListener('click', () => {
+    const text = document.getElementById('share-poster-text')?.textContent;
+    const risk = document.getElementById('share-poster-risk')?.textContent;
+    const abs = document.getElementById('share-poster-absurdity')?.textContent;
+    const susp = document.getElementById('share-poster-suspicion')?.textContent;
+
+    const formatted = `📜 [CERTIFIED BAHANA LAB DISASTER CARD] 😂\n\n"${text}"\n\n📊 Risk: ${risk}\n🔥 Absurdity: ${abs}\n👀 Suspicion: ${susp}\n\nBachao apni izzat: ${window.location.href}`;
+    navigator.clipboard.writeText(formatted).then(() => {
+      sfx.playClick();
+      showToast('Disaster Card text copied for Instagram / WhatsApp! 📸');
+    });
+  });
+
+  waBtn?.addEventListener('click', () => {
+    const text = document.getElementById('share-poster-text')?.textContent;
+    const risk = document.getElementById('share-poster-risk')?.textContent;
+    const abs = document.getElementById('share-poster-absurdity')?.textContent;
+
+    const waText = encodeURIComponent(`😂 *Certified Bahana Lab Disaster Card* 📜\n\n"${text}"\n\n📊 Risk: ${risk} | Absurdity: ${abs}\n\nCheck out Bahana Lab v2.0: ${window.location.href}`);
+    window.open(`https://wa.me/?text=${waText}`, '_blank');
+  });
+}
+
+function renderShareCardPoster() {
+  if (!STATE.currentExcuse) return;
+
+  const textEl = document.getElementById('share-poster-text');
+  const riskEl = document.getElementById('share-poster-risk');
+  const absEl = document.getElementById('share-poster-absurdity');
+  const suspEl = document.getElementById('share-poster-suspicion');
+
+  const activeText = document.getElementById('card-excuse-text')?.textContent || STATE.currentExcuse.text;
+  const activeRisk = document.getElementById('card-risk-level')?.textContent || `Risk: ${STATE.currentExcuse.risk}`;
+  const activeAbs = document.getElementById('meter-absurdity-val')?.textContent || `${STATE.currentExcuse.absurdity}%`;
+  const activeSusp = document.getElementById('meter-suspicion-val')?.textContent || `${STATE.currentExcuse.suspicion}%`;
+
+  if (textEl) textEl.textContent = activeText;
+  if (riskEl) riskEl.textContent = activeRisk;
+  if (absEl) absEl.textContent = activeAbs;
+  if (suspEl) suspEl.textContent = activeSusp;
+}
+
 
